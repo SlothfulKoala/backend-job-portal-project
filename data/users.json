@@ -1,0 +1,33 @@
+[
+  {
+    "id": "USER-a1b2c3d4",
+    "name": "Aditya Goyal",
+    "email": "aditya@example.com",
+    "password": "password_here",
+    "role": "seeker", 
+    "profile": {
+      "skills": ["JavaScript", "Node.js", "MongoDB"],
+      "experience": 2,
+      "resumeText": "Detailed bio or resume content goes here..."
+    }
+  },
+  {
+    "id": "USER-e5f6g7h8",
+    "name": "Hr Manager",
+    "email": "hr@techcorp.com",
+    "password": "password_here",
+    "role": "employer",
+    "companyDetails": {
+      "name": "Tech Corp Inc.",
+      "website": "https://www.techcorp.com",
+      "location": "Ludhiana"
+    }
+  },
+  {
+    "id": "USER-i9j0k1l2",
+    "name": "System Admin",
+    "email": "admin@portal.com",
+    "password": "admin_password",
+    "role": "admin"
+  }
+]

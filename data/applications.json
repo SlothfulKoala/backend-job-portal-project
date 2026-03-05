@@ -1,0 +1,10 @@
+[
+  {
+    "id": "APP-1a2b3c4d",
+    "jobId": "JOB-5a6b7c8d",
+    "seekerId": "USER-a1b2c3d4",
+    "status": "pending",
+    "appliedAt": "2026-03-05T16:00:00Z",
+    "notes": "I am very interested in this role as a 4th-semester CS student."
+  }
+]

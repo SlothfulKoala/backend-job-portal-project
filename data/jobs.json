@@ -1,0 +1,26 @@
+[
+  {
+    "id": "JOB-5a6b7c8d",
+    "title": "Backend Developer",
+    "type": "full-time",
+    "salary": 60000,
+    "location": "Ludhiana",
+    "category": "Engineering",
+    "description": "Develop robust APIs using Express and Node.js.",
+    "requirements": ["Node.js", "Express", "REST APIs"],
+    "postedBy": "USER-e5f6g7h8",
+    "postedAt": "2026-03-05T10:00:00Z"
+  },
+  {
+    "id": "JOB-9e0f1g2h",
+    "title": "Frontend Intern",
+    "type": "contract",
+    "salary": 15000,
+    "location": "Remote",
+    "category": "Design",
+    "description": "Help us build a modern UI using Vanilla JS and CSS.",
+    "requirements": ["HTML", "CSS", "JS"],
+    "postedBy": "USER-e5f6g7h8",
+    "postedAt": "2026-03-05T14:30:00Z"
+  }
+]
