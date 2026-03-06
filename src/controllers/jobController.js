@@ -129,3 +129,41 @@ exports.getJobApplicants = (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+// DELETE /jobs/:jobId (Delete a job posted by the employer)
+exports.deleteJob = (req, res) => {
+    try {
+        const { jobId } = req.params;       // The ID from the URL
+        const employerId = req.user.id;     // The logged-in employer
+
+        const jobs = readData('jobs');
+        
+        // 1. Find the exact position (index) of the job in our array
+        const jobIndex = jobs.findIndex(j => j.id === jobId);
+
+        // 2. If it's not found, return a 404 error
+        if (jobIndex === -1) {
+            return res.status(404).json({ message: 'Job not found' });
+        }
+
+        // 3. Security Check: Does this job actually belong to the person trying to delete it?
+        if (jobs[jobIndex].postedBy !== employerId) {
+            return res.status(403).json({ message: 'Unauthorized: You can only delete your own jobs' });
+        }
+
+        // 4. Remove the job from the array using splice
+        jobs.splice(jobIndex, 1);
+
+        // 5. Save the updated array back to jobs.json
+        writeData('jobs', jobs);
+
+        // Note: In a real database, you might also want to delete all applications 
+        // linked to this job. For now, just deleting the job is perfect.
+
+        res.status(200).json({ message: 'Job deleted successfully' });
+
+    } catch (error) {
+        console.error("Error deleting job:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

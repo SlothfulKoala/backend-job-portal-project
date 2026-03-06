@@ -16,4 +16,7 @@ router.get('/my-jobs', requireAuth, jobController.getMyJobs);
 // 4. NEW: Get all applicants for a specific job
 router.get('/applicants/:jobId', requireAuth, jobController.getJobApplicants);
 
+// NEW: Delete a specific job
+router.delete('/:jobId', requireAuth, jobController.deleteJob);
+
 module.exports = router;
