@@ -4,8 +4,16 @@ const { requireAuth } = require('../middlewares/auth');
 
 const router = express.Router();
 
-// The base path is already /api/jobs (handled by app.js and urls.js)
-router.post('/', requireAuth, jobController.createJob);           // POST /api/jobs
-router.get('/my-jobs', requireAuth, jobController.getMyJobs);     // GET /api/jobs/my-jobs
+// 1. Create a job 
+router.post('/', requireAuth, jobController.createJob);           
+
+// 2. Get ALL jobs (Public job board)
+router.get('/', jobController.getAllJobs);                        
+
+// 3. Get specific employer's jobs 
+router.get('/my-jobs', requireAuth, jobController.getMyJobs);     
+
+// 4. NEW: Get all applicants for a specific job
+router.get('/applicants/:jobId', requireAuth, jobController.getJobApplicants);
 
 module.exports = router;

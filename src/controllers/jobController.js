@@ -47,6 +47,19 @@ exports.createJob = (req, res) => {
     }
 };
 
+// GET /jobs (Fetch all available jobs for applicants)
+exports.getAllJobs = (req, res) => {
+    try {
+        const jobs = readData('jobs'); // Reads all jobs from jobs.json
+        res.status(200).json({ jobs });
+    } catch (error) {
+        // Logs the error to your terminal so you can debug it
+        console.error("Error fetching all jobs:", error);
+        // Sends a safe 500 error back to the user/frontend
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 // GET /my-jobs
 exports.getMyJobs = (req, res) => {
     try {
@@ -60,6 +73,59 @@ exports.getMyJobs = (req, res) => {
         res.status(200).json({ jobs: myJobs });
     } catch (error) {
         console.error("Error fetching jobs:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// GET /jobs/:jobId/applicants (See everyone who applied for a specific job)
+exports.getJobApplicants = (req, res) => {
+    try {
+        const { jobId } = req.params;       // The job we are looking up
+        const employerId = req.user.id;     // The logged-in employer
+
+        // Read all necessary data
+        const jobs = readData('jobs');
+        const applications = readData('applications');
+        const users = readData('users');
+
+        // 1. Verify the job exists AND belongs to this employer
+        const job = jobs.find(j => j.id === jobId);
+        if (!job) {
+            return res.status(404).json({ message: 'Job not found' });
+        }
+        if (job.postedBy !== employerId) {
+            return res.status(403).json({ message: 'Unauthorized: You did not post this job' });
+        }
+
+        // 2. Find all applications linked to this specific job
+        const jobApplications = applications.filter(app => app.jobId === jobId);
+
+        // 3. Attach the full user profile to each application
+        const applicantsList = jobApplications.map(app => {
+            // Find the user who submitted this application
+            const applicantUser = users.find(u => u.id === app.seekerId) || {};
+            
+            // Security: Strip out the password before sending data to the employer!
+            const { password, ...safeUserData } = applicantUser;
+
+            return {
+                applicationId: app.id,
+                status: app.status,
+                appliedAt: app.appliedAt,
+                coverLetterNotes: app.notes,
+                applicantProfile: safeUserData // Contains email, name, skills, etc.
+            };
+        });
+
+        // 4. Send back the job title and the enriched list of applicants
+        res.status(200).json({
+            jobTitle: job.title,
+            totalApplicants: applicantsList.length,
+            applicants: applicantsList
+        });
+
+    } catch (error) {
+        console.error("Error fetching job applicants:", error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
