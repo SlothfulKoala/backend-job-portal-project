@@ -1,11 +1,11 @@
-// src/routes/authRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const authController = require("../controllers/authController");
 
-// Placeholder route so the file isn't empty
-router.get('/test', (req, res) => {
-    res.json({ message: 'Auth route is working!' });
-});
+// POST /api/auth/signup
+router.post("/signup", authController.signup);
 
-// THIS IS THE CRUCIAL LINE
+// POST /api/auth/login
+router.post("/login", authController.login);
+
 module.exports = router;
