@@ -13,7 +13,7 @@ router.post('/', requireAuth, authorizeRole('employer'), jobController.createJob
 router.get('/my-jobs', requireAuth, authorizeRole('employer'), jobController.getMyJobs);     
 
 // Get all applicants for a specific job
-router.get('/:jobId/applicants', requireAuth, authorizeRole('employer'), jobController.getJobApplicants);
+router.get('/applicants/:jobId', requireAuth, authorizeRole('employer'), jobController.getJobApplicants);
 
 // Delete a specific job
 router.delete('/:jobId', requireAuth, authorizeRole('employer'), jobController.deleteJob);
