@@ -1,8 +1,11 @@
 const express = require('express');
 const path = require('path');
 const apiRoutes = require('./routes/urls');
+const logger = require('./middlewares/logger');
 
 const app = express();
+
+const logger = require('./middlewares/logger');
 
 app.use(express.json());
 

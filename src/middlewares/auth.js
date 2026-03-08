@@ -38,7 +38,6 @@ exports.authorizeRole = (...allowedRoles) => {
         // If their role matches (e.g., they are an "employer"), let them through!
         next();
     };
-    next(); 
 };
 
 // ensures that the user making the request is an admin
