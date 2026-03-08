@@ -1,26 +1,19 @@
 [
   {
-    "id": "JOB-5a6b7c8d",
-    "title": "Backend Developer",
+    "id": "JOB-658fe32c",
+    "title": "Backend Engineer - Ticketing Systems",
     "type": "full-time",
-    "salary": 60000,
-    "location": "Ludhiana",
-    "category": "Engineering",
-    "description": "Develop robust APIs using Express and Node.js.",
-    "requirements": ["Node.js", "Express", "REST APIs"],
-    "postedBy": "USER-e5f6g7h8",
-    "postedAt": "2026-03-05T10:00:00Z"
-  },
-  {
-    "id": "JOB-9e0f1g2h",
-    "title": "Frontend Intern",
-    "type": "contract",
-    "salary": 15000,
+    "salary": 95000,
     "location": "Remote",
-    "category": "Design",
-    "description": "Help us build a modern UI using Vanilla JS and CSS.",
-    "requirements": ["HTML", "CSS", "JS"],
-    "postedBy": "USER-e5f6g7h8",
-    "postedAt": "2026-03-05T14:30:00Z"
+    "category": "Engineering",
+    "description": "Join our fast-paced team to help build a dynamic event ticketing and reservation system. You will be working on high-concurrency queues, scalable API architecture, and secure data routing.",
+    "requirements": [
+      "Node.js & Express",
+      "Strong grasp of Data Structures & Algorithms",
+      "Experience with Queue management",
+      "REST API Design"
+    ],
+    "postedBy": "USER-1772911175430",
+    "postedAt": "2026-03-07T19:25:37.164Z"
   }
 ]

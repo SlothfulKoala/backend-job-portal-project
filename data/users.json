@@ -1,21 +1,9 @@
 [
   {
-    "id": "USER-a1b2c3d4",
-    "name": "Aditya Goyal",
-    "email": "aditya@example.com",
-    "password": "password_here",
-    "role": "seeker", 
-    "profile": {
-      "skills": ["JavaScript", "Node.js", "MongoDB"],
-      "experience": 2,
-      "resumeText": "Detailed bio or resume content goes here..."
-    }
-  },
-  {
-    "id": "USER-e5f6g7h8",
-    "name": "Hr Manager",
+    "userId": "USER-1772911175430",
+    "name": "Tech Corp HR",
     "email": "hr@techcorp.com",
-    "password": "password_here",
+    "password": "$2b$10$Gx8gL1gk6CdyHFBVTuvxAuvqR.atIDSkeAvITyDulwGVlkTxuYwaq",
     "role": "employer",
     "companyDetails": {
       "name": "Tech Corp Inc.",
@@ -24,10 +12,19 @@
     }
   },
   {
-    "id": "USER-i9j0k1l2",
-    "name": "System Admin",
-    "email": "admin@portal.com",
-    "password": "admin_password",
-    "role": "admin"
+    "userId": "USER-1772911226024",
+    "name": "arnav",
+    "email": "arnavsaini@example.com",
+    "password": "$2b$10$IswqDpLwxpG1bBm8RGaT.OAn7un6BcIda/WXGXLYYr/N6sqX0nSk.",
+    "role": "seeker",
+    "profile": {
+      "skills": [
+        "JavaScript",
+        "Node.js",
+        "MongoDB"
+      ],
+      "experience": 2,
+      "resumeText": "Detailed bio or resume content goes here..."
+    }
   }
 ]

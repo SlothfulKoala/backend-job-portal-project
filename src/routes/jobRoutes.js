@@ -1,22 +1,21 @@
 const express = require('express');
 const jobController = require('../controllers/jobController');
-const { requireAuth } = require('../middlewares/auth'); 
-
+const { requireAuth, authorizeRole } = require('../middlewares/auth'); 
 const router = express.Router();
 
-// 1. Create a job 
-router.post('/', requireAuth, jobController.createJob);           
-
-// 2. Get ALL jobs (Public job board)
+// Get ALL jobs (Job seekers need to be able to see this!)
 router.get('/', jobController.getAllJobs);                        
 
-// 3. Get specific employer's jobs 
-router.get('/my-jobs', requireAuth, jobController.getMyJobs);     
+// Create a job 
+router.post('/', requireAuth, authorizeRole('employer'), jobController.createJob);           
 
-// 4. NEW: Get all applicants for a specific job
-router.get('/applicants/:jobId', requireAuth, jobController.getJobApplicants);
+// Get specific employer's jobs 
+router.get('/my-jobs', requireAuth, authorizeRole('employer'), jobController.getMyJobs);     
 
-// NEW: Delete a specific job
-router.delete('/:jobId', requireAuth, jobController.deleteJob);
+// Get all applicants for a specific job
+router.get('/:jobId/applicants', requireAuth, authorizeRole('employer'), jobController.getJobApplicants);
+
+// Delete a specific job
+router.delete('/:jobId', requireAuth, authorizeRole('employer'), jobController.deleteJob);
 
 module.exports = router;
