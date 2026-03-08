@@ -21,10 +21,11 @@
       "skills": [
         "JavaScript",
         "Node.js",
-        "MongoDB"
+        "Express",
+        "Thunder Client"
       ],
       "experience": 2,
-      "resumeText": "Detailed bio or resume content goes here..."
+      "resumeText": "4th-semester CS student at Chitkara University. I build secure REST APIs."
     }
   }
 ]

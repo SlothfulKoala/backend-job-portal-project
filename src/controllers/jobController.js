@@ -1,5 +1,35 @@
 const { readData, writeData, generateId } = require('../utils/dataHandler');
 
+const fs = require("fs");
+const path = require("path"); // <-- This is the missing piece!
+
+const getJobs = () => {
+  const filePath = path.join(__dirname, "../../data/jobs.json");
+  try {
+    if (!fs.existsSync(filePath)) return [];
+    const data = fs.readFileSync(filePath, "utf-8");
+    return data ? JSON.parse(data) : [];
+  } catch (error) { return []; }
+};
+
+const getApplications = () => {
+  const filePath = path.join(__dirname, "../../data/applications.json");
+  try {
+    if (!fs.existsSync(filePath)) return [];
+    const data = fs.readFileSync(filePath, "utf-8");
+    return data ? JSON.parse(data) : [];
+  } catch (error) { return []; }
+};
+
+const getUsers = () => {
+  const filePath = path.join(__dirname, "../../data/users.json");
+  try {
+    if (!fs.existsSync(filePath)) return [];
+    const data = fs.readFileSync(filePath, "utf-8");
+    return data ? JSON.parse(data) : [];
+  } catch (error) { return []; }
+};
+
 // POST /jobs
 exports.createJob = (req, res) => {
     try {
@@ -77,57 +107,59 @@ exports.getMyJobs = (req, res) => {
     }
 };
 
-// GET /jobs/:jobId/applicants (See everyone who applied for a specific job)
+// GET /:jobId/applicants
 exports.getJobApplicants = (req, res) => {
-    try {
-        const { jobId } = req.params;       // The job we are looking up
-        const employerId = req.user.id;     // The logged-in employer
+  try {
+    const { jobId } = req.params;
+    const employerId = req.user.id; // From your Bouncer
 
-        // Read all necessary data
-        const jobs = readData('jobs');
-        const applications = readData('applications');
-        const users = readData('users');
+    // Make sure you have your getJobs, getApplications, and getUsers helpers!
+    const jobs = getJobs();
+    const applications = getApplications();
+    const users = getUsers(); // We need to read users.json to get the profiles!
 
-        // 1. Verify the job exists AND belongs to this employer
-        const job = jobs.find(j => j.id === jobId);
-        if (!job) {
-            return res.status(404).json({ message: 'Job not found' });
-        }
-        if (job.postedBy !== employerId) {
-            return res.status(403).json({ message: 'Unauthorized: You did not post this job' });
-        }
-
-        // 2. Find all applications linked to this specific job
-        const jobApplications = applications.filter(app => app.jobId === jobId);
-
-        // 3. Attach the full user profile to each application
-        const applicantsList = jobApplications.map(app => {
-            // Find the user who submitted this application
-            const applicantUser = users.find(u => u.id === app.seekerId) || {};
-            
-            // Security: Strip out the password before sending data to the employer!
-            const { password, ...safeUserData } = applicantUser;
-
-            return {
-                applicationId: app.id,
-                status: app.status,
-                appliedAt: app.appliedAt,
-                coverLetterNotes: app.notes,
-                applicantProfile: safeUserData // Contains email, name, skills, etc.
-            };
-        });
-
-        // 4. Send back the job title and the enriched list of applicants
-        res.status(200).json({
-            jobTitle: job.title,
-            totalApplicants: applicantsList.length,
-            applicants: applicantsList
-        });
-
-    } catch (error) {
-        console.error("Error fetching job applicants:", error);
-        res.status(500).json({ message: 'Internal server error' });
+    const job = jobs.find(j => j.id === jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
     }
+
+    // Security Check
+    if (job.postedBy !== employerId) {
+      return res.status(403).json({ message: "Forbidden: You do not own this job." });
+    }
+
+    // 1. Find all applications for this specific job
+    const jobApps = applications.filter(app => app.jobId === jobId);
+
+    // 2. Loop through those applications and attach the Seeker's profile
+    const applicantsData = jobApps.map(app => {
+      // THE FIX: Look for u.userId instead of u.id!
+      const seeker = users.find(u => u.userId === app.seekerId);
+
+      return {
+        applicationId: app.id,
+        status: app.status,
+        appliedAt: app.appliedAt,
+        coverLetterNotes: app.notes,
+        // If we found the seeker, unpack their data. Otherwise, return {}
+        applicantProfile: seeker ? {
+          name: seeker.name,
+          email: seeker.email,
+          ...(seeker.profile || {}) // Attach the skills/resume if they exist
+        } : {}
+      };
+    });
+
+    res.json({
+      jobTitle: job.title,
+      totalApplicants: jobApps.length,
+      applicants: applicantsData
+    });
+
+  } catch (error) {
+    console.error("Get Applicants Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 // DELETE /jobs/:jobId (Delete a job posted by the employer)

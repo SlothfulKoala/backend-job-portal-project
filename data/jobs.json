@@ -1,19 +1,13 @@
 [
   {
-    "id": "JOB-658fe32c",
-    "title": "Backend Engineer - Ticketing Systems",
+    "id": "JOB-5839fa6f",
+    "title": "Junior Node.js Developer",
     "type": "full-time",
-    "salary": 95000,
+    "salary": 80000,
     "location": "Remote",
     "category": "Engineering",
-    "description": "Join our fast-paced team to help build a dynamic event ticketing and reservation system. You will be working on high-concurrency queues, scalable API architecture, and secure data routing.",
-    "requirements": [
-      "Node.js & Express",
-      "Strong grasp of Data Structures & Algorithms",
-      "Experience with Queue management",
-      "REST API Design"
-    ],
+    "description": "Looking for a backend developer who knows Express and JWTs!",
     "postedBy": "USER-1772911175430",
-    "postedAt": "2026-03-07T19:25:37.164Z"
+    "postedAt": "2026-03-08T12:59:43.654Z"
   }
 ]

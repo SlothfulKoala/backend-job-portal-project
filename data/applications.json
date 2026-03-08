@@ -1,10 +1,10 @@
 [
   {
-    "id": "APP-1a2b3c4d",
-    "jobId": "JOB-658fe32c",
+    "id": "APP-1772975113322",
+    "jobId": "JOB-5839fa6f",
     "seekerId": "USER-1772911226024",
-    "status": "pending",
-    "appliedAt": "2026-03-05T16:00:00Z",
-    "notes": "I am very interested in this role as a 4th-semester CS student."
+    "status": "shortlisted",
+    "appliedAt": "2026-03-08T13:05:13.322Z",
+    "notes": "I am a perfect fit for this! I just built a complete JWT auth system."
   }
 ]
