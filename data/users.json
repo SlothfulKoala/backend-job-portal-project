@@ -44,5 +44,12 @@
       "experience": 2,
       "resumeText": "4th-semester CS student at Chitkara University. I build secure REST APIs."
     }
+  },
+  {
+    "userId": "USER-1773055953424",
+    "name": "Adi",
+    "email": "Adi@example.com",
+    "password": "$2b$10$GFaFWWF.KJSfeDeTuTYexe8eHfo6hPUdc.mv0hO3z17Z2ySOxrmSe",
+    "role": "admin"
   }
 ]
