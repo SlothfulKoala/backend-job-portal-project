@@ -6,5 +6,13 @@
     "status": "shortlisted",
     "appliedAt": "2026-03-08T13:05:13.322Z",
     "notes": "I am a perfect fit for this! I just built a complete JWT auth system."
+  },
+  {
+    "id": "APP-1773053238919",
+    "jobId": "JOB-5839fa6f",
+    "seekerId": "USER-1773053087162",
+    "status": "pending",
+    "appliedAt": "2026-03-09T10:47:18.919Z",
+    "notes": ""
   }
 ]

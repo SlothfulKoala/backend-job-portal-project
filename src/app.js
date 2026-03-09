@@ -5,8 +5,6 @@ const logger = require('./middlewares/logger');
 
 const app = express();
 
-const logger = require('./middlewares/logger');
-
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, '../public/views')));

@@ -27,5 +27,22 @@
       "experience": 2,
       "resumeText": "4th-semester CS student at Chitkara University. I build secure REST APIs."
     }
+  },
+  {
+    "userId": "USER-1773053087162",
+    "name": "Akash",
+    "email": "akash@example.com",
+    "password": "$2b$10$sQV2nYWsLqd96z4FOJ81H.NBGCQvSQ2hs3RUKz2VkgG7Of1DlYlla",
+    "role": "seeker",
+    "profile": {
+      "skills": [
+        "JavaScript",
+        "Node.js",
+        "Express",
+        "Thunder Client"
+      ],
+      "experience": 2,
+      "resumeText": "4th-semester CS student at Chitkara University. I build secure REST APIs."
+    }
   }
 ]
