@@ -27,7 +27,7 @@ copy the jobId of the job you want to apply to
 ## POST /api/applications/apply/:jobId
 returns application status and applicationID
 
-PATCH /api/users/profile
+## PATCH /api/users/profile
 {
     "experience" : 100
 } 
