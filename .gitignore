@@ -35,7 +35,5 @@
 
 # --- Operating System ---
 # System-specific junk (Mac/Windows)
-# Global IDE & OS Files
-.vscode/
 .DS_Store
-*.log
+Thumbs.db
