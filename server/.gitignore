@@ -1,0 +1,14 @@
+# Dependencies - This is the most important one!
+node_modules/
+
+# Environment variables (secrets like MongoDB URIs, API keys)
+.env
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS metadata
+.DS_Store
+Thumbs.db

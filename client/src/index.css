@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* This is the v4 way of setting up your team's design rules! */
+@theme {
+  --color-cvPrimary: #2563eb;
+  --color-cvSecondary: #475569;
+  --color-cvAccent: #10b981;
+  --color-cvBackground: #f8fafc;
+  --font-sans: "Inter", sans-serif;
+}
+
+body {
+  background-color: var(--color-cvBackground);
+}
