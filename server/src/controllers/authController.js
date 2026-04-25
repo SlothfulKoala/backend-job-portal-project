@@ -35,7 +35,15 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: "Name or Email already registered" });
     }
 
-    // Restored to userId!
+    // Determine the profile picture URL (Cloudinary vs Google vs Default)
+    let finalProfilePic = "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg"; 
+
+    if (req.file && req.file.path) {
+        finalProfilePic = req.file.path; // The Cloudinary URL from Multer!
+    } else if (req.body.googlePictureUrl) {
+        finalProfilePic = req.body.googlePictureUrl; // Fallback for Member 1's Google Auth
+    }
+
     const userId = "USER-" + Date.now();
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -44,7 +52,8 @@ exports.signup = async (req, res) => {
         name, 
         email, 
         password: hashedPassword, 
-        role 
+        role,
+        profilePic: finalProfilePic // <-- Saved the Cloudinary URL to the user object
     };
 
     // Attach the extra data based on role
@@ -58,13 +67,13 @@ exports.signup = async (req, res) => {
     saveUsers(users);
 
     const { password: _, ...safeUser } = newUser;
-    // 1. Generate the token exactly like you do in login
+    
     const token = jwt.sign(
         { id: newUser.userId, role: newUser.role }, 
-        "BEE@JPP",
+        "BEE@JPP", // Note: Ensure this moves to process.env.JWT_SECRET later!
         { expiresIn: "1h" }
     );
-    // 2. Send the token back along with the success message
+    
     res.status(201).json({
         message: "Signup and login successful",
         token,
@@ -97,7 +106,6 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // We keep 'id' here so your existing middleware (req.user.id) doesn't break
     const token = jwt.sign(
       { id: user.userId, role: user.role }, 
       "BEE@JPP", 
@@ -108,10 +116,11 @@ exports.login = async (req, res) => {
       message: "Login successful",
       token,
       user: { 
-          userId: user.userId, // Restored to userId
+          userId: user.userId,
           name: user.name, 
           email: user.email, 
           role: user.role,
+          profilePic: user.profilePic, // <-- Send the picture URL back to the frontend on login
           ...(user.profile && { profile: user.profile }),
           ...(user.companyDetails && { companyDetails: user.companyDetails })
       }
