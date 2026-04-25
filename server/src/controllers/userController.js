@@ -1,43 +1,24 @@
-const fs = require("fs");
-const path = require("path");
+const User = require('../models/user'); // Make sure the path matches your structure
 
-const usersFile = path.join(__dirname, "../../data/users.json");
-
-const getUsers = () => {
-  try {
-    if (!fs.existsSync(usersFile)) return [];
-    const data = fs.readFileSync(usersFile, "utf-8");
-    return data ? JSON.parse(data) : [];
-  } catch (error) {
-    return [];
-  }
-};
-
-const saveUsers = (users) => {
-  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
-};
-
-// PATCH /profile
-exports.updateProfile = (req, res) => {
+// PATCH /api/user/profile
+exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;   // Extracted from the validated JWT
     const role = req.user.role;   // Extracted from the validated JWT
     const updates = req.body;     // The partial data sent in Thunder Client
 
-    const users = getUsers();
-    const userIndex = users.findIndex(u => u.userId === userId);
+    // 1. Find user directly in MongoDB
+    const user = await User.findById(userId);
 
-    if (userIndex === -1) {
+    if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    let user = users[userIndex];
-
-    // 1. Update basic shared fields
+    // 2. Update basic shared fields
     if (updates.name) user.name = updates.name;
     if (updates.email) user.email = updates.email;
 
-    // 2. Seeker-specific updates (Merges old profile data with new updates)
+    // 3. Seeker-specific updates (Merges old profile data with new updates)
     if (role === "seeker" && updates.profile) {
       user.profile = { 
         ...user.profile, 
@@ -45,7 +26,7 @@ exports.updateProfile = (req, res) => {
       };
     }
 
-    // 3. Employer-specific updates (Merges old company data with new updates)
+    // 4. Employer-specific updates (Merges old company data with new updates)
     if (role === "employer" && updates.companyDetails) {
       user.companyDetails = { 
         ...user.companyDetails, 
@@ -53,12 +34,12 @@ exports.updateProfile = (req, res) => {
       };
     }
 
-    // 4. Save the updated user back to the array
-    users[userIndex] = user;
-    saveUsers(users);
+    // 5. Save the updated user back to MongoDB
+    await user.save();
 
-    // 5. Strip the hashed password before sending the response
-    const { password, ...safeUser } = user;
+    // 6. Strip the hashed password before sending the response
+    const safeUser = user.toObject();
+    delete safeUser.password;
 
     res.json({
       message: "Profile updated successfully",
@@ -67,6 +48,47 @@ exports.updateProfile = (req, res) => {
 
   } catch (error) {
     console.error("Profile Update Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// GET /api/user/me
+// Purpose: Fetch the currently logged-in user's data
+exports.getMyProfile = async (req, res) => {
+  try {
+    // req.user.id comes from your JWT Auth Middleware
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Get My Profile Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+// GET /api/user/:id
+// Purpose: Fetch ANY user's profile by their MongoDB ID
+exports.getUserProfile = async (req, res) => {
+  try {
+    // req.params.id comes from the URL (e.g., /api/user/65b2a1c...)
+    const user = await User.findById(req.params.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    // If the ID is completely invalid/malformed, Mongoose throws a specific error
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: "User not found" });
+    }
+    console.error("Get User Profile Error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
