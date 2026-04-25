@@ -34,7 +34,7 @@ const Footer = () => {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            <a href="/jobs" className="bg-cvPrimary text-white px-8 py-3.5 rounded-full text-sm font-semibold text-center hover:opacity-90 transition-opacity">Find Jobs Now</a>
+            <a href="/jobs" className="bg-cv-primary text-white px-8 py-3.5 rounded-full text-sm font-semibold text-center hover:opacity-90 transition-opacity">Find Jobs Now</a>
             <a href="/employer" className="bg-white text-black px-8 py-3.5 rounded-full text-sm font-semibold text-center hover:opacity-90 transition-opacity">Post a Job</a>
           </div>
         </div>
@@ -45,19 +45,19 @@ const Footer = () => {
         {/* Middle Section */}
         <div className="flex flex-col lg:flex-row justify-between gap-12">
           
-          <div className="max-w-90">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-9 h-9 bg-white rounded-lg flex justify-center items-center">
-                <svg viewBox="0 0 24 24" className="w-5.5 h-5.5 fill-cvPrimary" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14.5 4H7.5C6.1 4 5 5.1 5 6.5V11H12C13.1 11 14 11.9 14 13V17H16.5C17.9 17 19 15.9 19 14.5V10C19 8.9 18.1 8 17 8H10V6.5C10 6.2 10.2 6 10.5 6H14.5V4ZM9.5 20H16.5C17.9 20 19 18.9 19 17.5V13H12C10.9 13 10 12.1 10 11V7H7.5C6.1 7 5 8.1 5 9.5V14C5 15.1 5.9 16 7 16H14V17.5C14 17.8 13.8 18 13.5 18H9.5V20Z"/>
-                </svg>
-              </div>
-              <div className="text-white text-2xl font-semibold tracking-tight">Career Vista</div>
+        <div className="max-w-90">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 bg-white rounded-lg flex justify-center items-center">
+              <svg viewBox="0 0 24 24" className="w-5.5 h-5.5 fill-cv-primary" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.5 4H7.5C6.1 4 5 5.1 5 6.5V11H12C13.1 11 14 11.9 14 13V17H16.5C17.9 17 19 15.9 19 14.5V10C19 8.9 18.1 8 17 8H10V6.5C10 6.2 10.2 6 10.5 6H14.5V4ZM9.5 20H16.5C17.9 20 19 18.9 19 17.5V13H12C10.9 13 10 12.1 10 11V7H7.5C6.1 7 5 8.1 5 9.5V14C5 15.1 5.9 16 7 16H14V17.5C14 17.8 13.8 18 13.5 18H9.5V20Z"/>
+              </svg>
             </div>
-            <p className="text-[#a1a1aa] text-sm leading-relaxed">
-              Career Vista empowers modern professionals with intelligent tools to hire smarter, apply faster, and grow stronger.
-            </p>
+            <div className="text-white text-2xl font-semibold tracking-tight">Career Vista</div>
           </div>
+          <p className="text-[#a1a1aa] text-sm leading-relaxed">
+            Career Vista empowers modern professionals with intelligent tools to hire smarter, apply faster, and grow stronger.
+          </p>
+        </div>
 
           <div className="flex flex-col sm:flex-row gap-12 sm:gap-20 pr-0 lg:pr-5">
             <div className="flex flex-col gap-4">
