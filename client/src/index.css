@@ -1,14 +1,28 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* This is the v4 way of setting up your team's design rules! */
 @theme {
-  --color-cvPrimary: #2563eb;
-  --color-cvSecondary: #475569;
-  --color-cvAccent: #10b981;
-  --color-cvBackground: #f8fafc;
+  --color-cv-primary: #2563eb;
+  --color-cv-secondary: #475569;
+  --color-cv-accent: #10b981;
+  --color-cv-background: var(--bg-color); /* Linked to variable below */
+  --color-cv-icon: var(--icon-color);      /* Linked to variable below */
   --font-sans: "Inter", sans-serif;
 }
 
+/* --- LIGHT MODE VALUES --- */
+:root {
+  --bg-color: #f8fafc;
+  --icon-color: #1a1ad0; /* Your deep blue */
+}
+
+/* --- DARK MODE OVERRIDES --- */
+.dark {
+  --bg-color: #020617;
+  --icon-color: #facc15; /* This is the hex code for yellow-400 */
+}
+
 body {
-  background-color: var(--color-cvBackground);
+  background-color: var(--color-cv-background);
+  transition: background-color 0.5s ease;
 }
