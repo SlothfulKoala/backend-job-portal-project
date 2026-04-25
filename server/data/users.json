@@ -51,5 +51,12 @@
     "email": "Adi@example.com",
     "password": "$2b$10$GFaFWWF.KJSfeDeTuTYexe8eHfo6hPUdc.mv0hO3z17Z2ySOxrmSe",
     "role": "admin"
+  },
+  {
+    "userId": "USER-1777112138049",
+    "name": "Test User",
+    "email": "test@test.com",
+    "password": "$2b$10$FZzh5N4Kw2O1GLU.DPRGY.QUyMiyVv4M8JYuMpaNx7JcCz7vYHxDa",
+    "role": "seeker"
   }
 ]
