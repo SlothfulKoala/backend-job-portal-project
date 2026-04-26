@@ -1,98 +1,40 @@
-const User = require('../models/user'); // Make sure the path matches your structure
+const User = require('../models/User');
 
-// PATCH /api/user/profile
 exports.updateProfile = async (req, res) => {
   try {
-    const userId = req.user.id;   // Extracted from the validated JWT
-    const role = req.user.role;   // Extracted from the validated JWT
-    const updates = req.body;     // The partial data sent in Thunder Client
+    const userId = req.user._id; // Set by your auth middleware
+    const updates = req.body;
 
-    // 1. Find user directly in MongoDB
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
+    // 1. Handle File Uploads from Cloudinary
+    if (req.files) {
+      if (req.files.profilePic) {
+        updates.profilePic = req.files.profilePic[0].path;
+      }
+      if (req.files.resume) {
+        // Nested update for the seeker profile
+        updates['profile.resume'] = req.files.resume[0].path;
+      }
     }
 
-    if (req.file && req.file.path) {
-        user.profilePic = req.file.path; // Update the image URL
+    // 2. Parse Links (FormData sends arrays as strings or individual items)
+    if (typeof updates.links === 'string') {
+      updates.links = JSON.parse(updates.links);
     }
 
-    // 2. Update basic shared fields
-    if (updates.name) user.name = updates.name;
-    if (updates.email) user.email = updates.email;
+    // 3. Update User in MongoDB
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
 
-    // 3. Seeker-specific updates (Merges old profile data with new updates)
-    if (role === "seeker" && updates.profile) {
-      user.profile = { 
-        ...user.profile, 
-        ...updates.profile 
-      };
-    }
-
-    // 4. Employer-specific updates (Merges old company data with new updates)
-    if (role === "employer" && updates.companyDetails) {
-      user.companyDetails = { 
-        ...user.companyDetails, 
-        ...updates.companyDetails 
-      };
-    }
-
-    // 5. Save the updated user back to MongoDB
-    await user.save();
-
-    // 6. Strip the hashed password before sending the response
-    const safeUser = user.toObject();
-    delete safeUser.password;
-
-    res.json({
+    res.status(200).json({
+      success: true,
       message: "Profile updated successfully",
-      user: safeUser
+      user: updatedUser
     });
-
   } catch (error) {
     console.error("Profile Update Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// GET /api/user/me
-// Purpose: Fetch the currently logged-in user's data
-exports.getMyProfile = async (req, res) => {
-  try {
-    // req.user.id comes from your JWT Auth Middleware
-    const user = await User.findById(req.user.id).select("-password");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.json(user);
-  } catch (error) {
-    console.error("Get My Profile Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-
-// GET /api/user/:id
-// Purpose: Fetch ANY user's profile by their MongoDB ID
-exports.getUserProfile = async (req, res) => {
-  try {
-    // req.params.id comes from the URL (e.g., /api/user/65b2a1c...)
-    const user = await User.findById(req.params.id).select("-password");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.json(user);
-  } catch (error) {
-    // If the ID is completely invalid/malformed, Mongoose throws a specific error
-    if (error.kind === 'ObjectId') {
-      return res.status(404).json({ message: "User not found" });
-    }
-    console.error("Get User Profile Error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ success: false, message: error.message });
   }
 };

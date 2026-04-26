@@ -8,7 +8,10 @@ const upload = require("../middlewares/upload");
 router.get("/me", requireAuth, userController.getMyProfile);
 
 // 2. Profile Update Route
-router.patch("/profile", requireAuth, upload.single('profilePic'), userController.updateProfile);
+router.patch("/profile", requireAuth, upload.fields([
+    { name: 'profilePic', maxCount: 1 },
+    { name: 'resume', maxCount: 1 }
+]), userController.updateProfile);
 
 // 3. Public Profile Route (Requires login to view others' profiles)
 router.get("/:id", requireAuth, userController.getUserProfile);
