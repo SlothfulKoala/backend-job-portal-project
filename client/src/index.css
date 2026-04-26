@@ -10,6 +10,17 @@
   --font-sans: "Inter", sans-serif;
 }
 
+/* --- SEARCH BAR COLOR CYCLE ANIMATION --- */
+@keyframes color-cycle {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+.animate-color-cycle {
+    /* Adjust the '4s' to make the color changing faster or slower */
+    animation: color-cycle 4s linear infinite;
+}
+
 /* --- LIGHT MODE VALUES --- */
 :root {
   --bg-color: #f8fafc;
