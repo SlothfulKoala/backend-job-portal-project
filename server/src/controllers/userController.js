@@ -14,6 +14,10 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
+    if (req.file && req.file.path) {
+        user.profilePic = req.file.path; // Update the image URL
+    }
+
     // 2. Update basic shared fields
     if (updates.name) user.name = updates.name;
     if (updates.email) user.email = updates.email;
