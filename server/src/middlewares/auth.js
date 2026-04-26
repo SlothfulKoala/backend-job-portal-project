@@ -1,49 +1,53 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User"); // We need the model to verify existence
 
-exports.requireAuth = (req, res, next) => {
+exports.requireAuth = async (req, res, next) => {
     try {
-        // 1. Look for the "Authorization" header
         const authHeader = req.headers.authorization;
 
-        // 2. Check if it exists and starts with "Bearer "
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             return res.status(401).json({ message: "Access denied. No token provided." });
         }
 
-        // 3. Extract the actual token string (ignoring the word "Bearer ")
         const token = authHeader.split(" ")[1];
 
-        // 4. Verify the token using your secret key
-        const decoded = jwt.verify(token, "BEE@JPP");
+        // 1. Use the same secret key used in authController
+        // TIP: Moving this to process.env.JWT_SECRET is safer!
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // 5. Attach the decoded payload { id, role } to the request!
-        req.user = decoded;
+        // 2. Fetch the user from MongoDB to ensure they actually exist
+        // We map 'id' from the token to '_id' in MongoDB
+        const user = await User.findById(decoded.id).select("-password");
 
-        // 6. Let them through to the controller
+        if (!user) {
+            return res.status(401).json({ message: "User no longer exists." });
+        }
+
+        // 3. Attach the REAL Mongoose user object to the request
+        req.user = user;
+
         next();
     } catch (error) {
+        console.error("Auth Middleware Error:", error.message);
         return res.status(401).json({ message: "Invalid or expired token." });
     }
 };
 
-//Checks if the logged-in user has the right role
+// (Keep authorizeRole and isAdmin as they are, they will work fine now!)
 exports.authorizeRole = (...allowedRoles) => {
     return (req, res, next) => {
-        // req.user was attached by the requireAuth middleware just before this
         if (!req.user || !allowedRoles.includes(req.user.role)) {
             return res.status(403).json({ 
-                message: "Forbidden: You do not have permission to perform this action." 
+                message: "Forbidden: You do not have permission." 
             });
         }
-        // If their role matches (e.g., they are an "employer"), let them through!
         next();
     };
 };
 
-// ensures that the user making the request is an admin
 exports.isAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
-        next(); // User is admin, let them through
+        next();
     } else {
         res.status(403).json({ message: "Access denied: Admins permissions required" });
     }
