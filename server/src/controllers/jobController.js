@@ -1,71 +1,38 @@
-const { readData, writeData, generateId } = require('../utils/dataHandler');
+const Job = require('../models/job');
+const Application = require('../models/application'); // Make sure you created this model earlier!
+const User = require('../models/user');
 
-const fs = require("fs");
-const path = require("path"); // <-- This is the missing piece!
-
-const getJobs = () => {
-  const filePath = path.join(__dirname, "../../data/jobs.json");
-  try {
-    if (!fs.existsSync(filePath)) return [];
-    const data = fs.readFileSync(filePath, "utf-8");
-    return data ? JSON.parse(data) : [];
-  } catch (error) { return []; }
-};
-
-const getApplications = () => {
-  const filePath = path.join(__dirname, "../../data/applications.json");
-  try {
-    if (!fs.existsSync(filePath)) return [];
-    const data = fs.readFileSync(filePath, "utf-8");
-    return data ? JSON.parse(data) : [];
-  } catch (error) { return []; }
-};
-
-const getUsers = () => {
-  const filePath = path.join(__dirname, "../../data/users.json");
-  try {
-    if (!fs.existsSync(filePath)) return [];
-    const data = fs.readFileSync(filePath, "utf-8");
-    return data ? JSON.parse(data) : [];
-  } catch (error) { return []; }
-};
-
-// POST /jobs
-exports.createJob = (req, res) => {
+// ================= POST /jobs =================
+exports.createJob = async (req, res) => {
     try {
         const { 
             title, 
             type, 
             salary, 
             location, 
-            category, 
-            description, 
-            requirements 
+            companyName,   // ✅ Added from our recent update
+            contactEmail,  // ✅ Added from our recent update
+            skills, 
+            description 
         } = req.body;
         
-        // Assuming your auth middleware puts the logged-in user's ID here
-        const postedBy = req.user.id; 
+        const postedBy = req.user.id; // From your auth middleware
 
-        // 1. Read existing jobs (notice we pass 'jobs', not 'jobs.json')
-        const jobs = readData('jobs');
-
-        // 2. Create the new job using your custom ID generator
-        const newJob = {
-            id: generateId('JOB'),
+        // 1. Create the new job 
+        const newJob = new Job({
             title,
             type,
             salary,
             location,
-            category,
+            companyName,
+            contactEmail,
+            skills,
             description,
-            requirements,
-            postedBy,
-            postedAt: new Date().toISOString() // Automatically generates correct format
-        };
+            postedBy
+        });
 
-        // 3. Save and respond
-        jobs.push(newJob);
-        writeData('jobs', jobs);
+        // 2. Save directly to MongoDB
+        await newJob.save();
 
         res.status(201).json({ 
             message: 'Job created successfully', 
@@ -77,28 +44,25 @@ exports.createJob = (req, res) => {
     }
 };
 
-// GET /jobs (Fetch all available jobs for applicants)
-exports.getAllJobs = (req, res) => {
+// ================= GET /jobs (All Jobs for Seekers) =================
+exports.getAllJobs = async (req, res) => {
     try {
-        const jobs = readData('jobs'); // Reads all jobs from jobs.json
+        // Find all jobs, sort by newest first
+        const jobs = await Job.find().sort({ createdAt: -1 }); 
         res.status(200).json({ jobs });
     } catch (error) {
-        // Logs the error to your terminal so you can debug it
         console.error("Error fetching all jobs:", error);
-        // Sends a safe 500 error back to the user/frontend
         res.status(500).json({ message: 'Internal server error' });
     }
 };
 
-// GET /my-jobs
-exports.getMyJobs = (req, res) => {
+// ================= GET /my-jobs =================
+exports.getMyJobs = async (req, res) => {
     try {
         const employerId = req.user.id;
-
-        const jobs = readData('jobs');
         
-        // Filter out jobs that don't belong to the logged-in employer
-        const myJobs = jobs.filter(job => job.postedBy === employerId);
+        // Find jobs where postedBy matches the logged-in employer
+        const myJobs = await Job.find({ postedBy: employerId }).sort({ createdAt: -1 });
 
         res.status(200).json({ jobs: myJobs });
     } catch (error) {
@@ -107,49 +71,49 @@ exports.getMyJobs = (req, res) => {
     }
 };
 
-// GET /:jobId/applicants
-exports.getJobApplicants = (req, res) => {
+// ================= GET /:jobId/applicants =================
+exports.getJobApplicants = async (req, res) => {
   try {
     const { jobId } = req.params;
-    const employerId = req.user.id; // From your Bouncer
+    const employerId = req.user.id;
 
-    // Make sure you have your getJobs, getApplications, and getUsers helpers!
-    const jobs = getJobs();
-    const applications = getApplications();
-    const users = getUsers(); // We need to read users.json to get the profiles!
-
-    const job = jobs.find(j => j.id === jobId);
+    // 1. Check if job exists and belongs to employer
+    const job = await Job.findById(jobId);
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
 
-    // Security Check
-    if (job.postedBy !== employerId) {
+    // Convert ObjectId to string for comparison
+    if (job.postedBy.toString() !== employerId) {
       return res.status(403).json({ message: "Forbidden: You do not own this job." });
     }
 
-    const jobApps = applications.filter(app => app.jobId === jobId);
+    // 2. Fetch applications AND "populate" the seeker data automatically!
+    // This replaces having to manually read users.json and match IDs.
+    const applications = await Application.find({ jobId })
+      .populate('seekerId', 'name email profilePic profile'); // Grab specific fields from User
 
-    const applicantsData = jobApps.map(app => {
-      const seeker = users.find(u => u.userId === app.seekerId);
+    // 3. Format the data for the frontend
+    const applicantsData = applications.map(app => {
+      const seeker = app.seekerId; // This is now a full user object thanks to .populate()
 
       return {
-        applicationId: app.id,
+        applicationId: app._id,
         status: app.status,
         appliedAt: app.appliedAt,
         coverLetterNotes: app.notes,
-        // If we found the seeker, unpack their data. Otherwise, return {}
         applicantProfile: seeker ? {
           name: seeker.name,
           email: seeker.email,
-          ...(seeker.profile || {}) // Attach the skills/resume if they exist
+          profilePic: seeker.profilePic,
+          ...(seeker.profile || {}) // Spreads resume, skills, bio if they exist
         } : {}
       };
     });
 
     res.json({
       jobTitle: job.title,
-      totalApplicants: jobApps.length,
+      totalApplicants: applications.length,
       applicants: applicantsData
     });
 
@@ -159,35 +123,28 @@ exports.getJobApplicants = (req, res) => {
   }
 };
 
-// DELETE /jobs/:jobId (Delete a job posted by the employer)
-exports.deleteJob = (req, res) => {
+// ================= DELETE /jobs/:jobId =================
+exports.deleteJob = async (req, res) => {
     try {
-        const { jobId } = req.params;       // The ID from the URL
-        const employerId = req.user.id;     // The logged-in employer
+        const { jobId } = req.params;
+        const employerId = req.user.id;
 
-        const jobs = readData('jobs');
-        
-        // 1. Find the exact position (index) of the job in our array
-        const jobIndex = jobs.findIndex(j => j.id === jobId);
-
-        // 2. If it's not found, return a 404 error
-        if (jobIndex === -1) {
+        // 1. Find the job
+        const job = await Job.findById(jobId);
+        if (!job) {
             return res.status(404).json({ message: 'Job not found' });
         }
 
-        // 3. Security Check: Does this job actually belong to the person trying to delete it?
-        if (jobs[jobIndex].postedBy !== employerId) {
+        // 2. Security Check
+        if (job.postedBy.toString() !== employerId) {
             return res.status(403).json({ message: 'Unauthorized: You can only delete your own jobs' });
         }
 
-        // 4. Remove the job from the array using splice
-        jobs.splice(jobIndex, 1);
+        // 3. Delete the job
+        await job.deleteOne();
 
-        // 5. Save the updated array back to jobs.json
-        writeData('jobs', jobs);
-
-        // Note: In a real database, you might also want to delete all applications 
-        // linked to this job. For now, just deleting the job is perfect.
+        // Bonus: Automatically clean up any applications that were attached to this deleted job
+        await Application.deleteMany({ jobId });
 
         res.status(200).json({ message: 'Job deleted successfully' });
 
