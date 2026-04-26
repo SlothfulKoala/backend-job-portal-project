@@ -55,7 +55,7 @@ exports.signup = async (req, res) => {
         email, 
         password: hashedPassword, 
         role,
-        profilePic: finalProfilePic // <-- Saved the Cloudinary URL to the user object
+        profilePic: "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg"
     };
 
     // Attach the extra data based on role
