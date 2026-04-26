@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext'; // ✅ Role-based check
 
 const Sidebar = () => {
   const location = useLocation();
+  const { user } = useContext(AuthContext); 
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -33,58 +35,71 @@ const Sidebar = () => {
           className="flex items-center p-3.75 text-[16px] font-medium text-[#111827] dark:text-white mb-5 pb-5 border-b border-[#e5e7eb] dark:border-slate-800 rounded-t-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
         >
             <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
-                
-                {/* 1. HAMBURGER: Both. Disappears on Open or Hover */}
                 <i className={`fa-solid fa-bars absolute text-[20px] transition-all duration-500 transform ${
-                  isOpen 
-                    ? 'opacity-0 scale-50 pointer-events-none' 
-                    : 'opacity-100 scale-100 group-hover/sidebar:opacity-0 group-hover/sidebar:scale-50'
+                  isOpen ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100 group-hover/sidebar:opacity-0 group-hover/sidebar:scale-50'
                 }`}></i>
-                
-                {/* 2. PIN ICON: Strictly DESKTOP. Forces hidden on mobile. */}
                 <i className={`fa-solid fa-thumbtack absolute text-[20px] transition-all duration-500 transform hidden! md:flex! items-center justify-center ${
-                  isOpen 
-                    ? 'opacity-100 scale-110 -rotate-45 text-cv-icon' 
-                    : 'opacity-0 scale-50 rotate-0 text-gray-400 group-hover/sidebar:opacity-100 group-hover/sidebar:scale-100 group-hover/sidebar:-rotate-45' 
+                  isOpen ? 'opacity-100 scale-110 -rotate-45 text-cv-icon' : 'opacity-0 scale-50 rotate-0 text-gray-400 group-hover/sidebar:opacity-100 group-hover/sidebar:scale-100 group-hover/sidebar:-rotate-45' 
                 }`}></i>
-
-                {/* 3. CROSS ICON: Strictly MOBILE. Forces hidden on desktop. */}
                 <i className={`fa-solid fa-xmark absolute text-[22px] transition-all duration-500 transform flex! md:hidden! items-center justify-center ${
-                  isOpen 
-                    ? 'opacity-100 scale-100 rotate-0' 
-                    : 'opacity-0 scale-50 rotate-90 pointer-events-none' 
+                  isOpen ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 rotate-90 pointer-events-none' 
                 }`}></i>
             </div>
             
             <span className={`font-bold ${textAnimationClass}`}>
                 {isOpen ? (
-                    <>
-                        <span className="md:hidden">Close</span>
-                        <span className="hidden md:inline">Pinned</span>
-                    </>
+                    <><span className="md:hidden">Close</span><span className="hidden md:inline">Pinned</span></>
                 ) : (
-                    <>
-                        <span className="md:group-hover/sidebar:hidden">Menu</span>
-                        <span className="hidden md:group-hover/sidebar:inline">Pin</span>
-                    </>
+                    <><span className="md:group-hover/sidebar:hidden">Menu</span><span className="hidden md:group-hover/sidebar:inline">Pin</span></>
                 )}
             </span>
         </div>
 
-        {/* Links */}
         <nav className="flex flex-col">
-            <Link to="/" className={getNavClass('/')}>
-                <i className="fa-solid fa-briefcase text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
-                <span className={textAnimationClass}>Jobs</span>
-            </Link>
-            <Link to="/employer" className={getNavClass('/employer')}>
-                <i className="fa-regular fa-building text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
-                <span className={textAnimationClass}>Companies</span>
-            </Link>
-            <Link to="/login" className={getNavClass('/login')}>
-                <i className="fa-solid fa-book-open text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
-                <span className={textAnimationClass}>Resources</span>
-            </Link>
+            
+            {/* ✅ EMPLOYER NAVIGATION */}
+            {user?.role === 'employer' ? (
+              <>
+                <Link to="/" className={getNavClass('/')}>
+                    <i className="fa-solid fa-chart-line text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
+                    <span className={textAnimationClass}>My Dashboard</span>
+                </Link>
+                <Link to="/create-job" className={getNavClass('/create-job')}>
+                    <i className="fa-solid fa-square-plus text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
+                    <span className={textAnimationClass}>Post Job</span>
+                </Link>
+                <Link to="/employer-profile" className={getNavClass('/employer-profile')}>
+                    <i className="fa-solid fa-building-user text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
+                    <span className={textAnimationClass}>Company</span>
+                </Link>
+              </>
+            ) : (
+              /* ✅ SEEKER OR GUEST NAVIGATION */
+              <>
+                <Link to="/" className={getNavClass('/')}>
+                    <i className="fa-solid fa-magnifying-glass text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
+                    <span className={textAnimationClass}>Find Jobs</span>
+                </Link>
+                {user?.role === 'seeker' && (
+                  <>
+                    <Link to="/my-applications" className={getNavClass('/my-applications')}>
+                        <i className="fa-solid fa-file-invoice text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
+                        <span className={textAnimationClass}>Applications</span>
+                    </Link>
+                    <Link to="/profile" className={getNavClass('/profile')}>
+                        <i className="fa-solid fa-user-pen text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
+                        <span className={textAnimationClass}>Profile</span>
+                    </Link>
+                  </>
+                )}
+                {!user && (
+                  <Link to="/login" className={getNavClass('/login')}>
+                      <i className="fa-solid fa-right-to-bracket text-[20px] min-w-6 text-center shrink-0 transition-all duration-400 group-hover/navitem:scale-125 group-hover/navitem:text-cv-icon"></i> 
+                      <span className={textAnimationClass}>Login</span>
+                  </Link>
+                )}
+              </>
+            )}
         </nav>
     </aside>
   );

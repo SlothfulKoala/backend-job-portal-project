@@ -1,58 +1,43 @@
-const fs = require("fs");
-const path = require("path");
+const Application = require('../models/application');
+const Job = require('../models/job');
 
-const applicationsFile = path.join(__dirname, "../../data/applications.json");
-
-// Helper to safely read applications
-const getApplications = () => {
-  try {
-    if (!fs.existsSync(applicationsFile)) return [];
-    const data = fs.readFileSync(applicationsFile, "utf-8");
-    return data ? JSON.parse(data) : [];
-  } catch (error) {
-    return [];
-  }
-};
-
-const saveApplications = (apps) => {
-  fs.writeFileSync(applicationsFile, JSON.stringify(apps, null, 2));
-};
-
-// POST /apply
-exports.applyForJob = (req, res) => {
+// ================= POST /apply/:jobId =================
+exports.applyForJob = async (req, res) => {
   try {
     const { jobId } = req.params; 
     const { notes } = req.body;   
-    
-    const seekerId = req.user.id;
+    const seekerId = req.user.id; // From requireAuth middleware
 
     if (!jobId) {
       return res.status(400).json({ message: "jobId is required to apply." });
     }
 
-    const applications = getApplications();
+    // 1. Check if the job actually exists
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found. It may have been deleted." });
+    }
 
-    // Prevent duplicate applications
-    const alreadyApplied = applications.find(
-        app => app.jobId === jobId && app.seekerId === seekerId
-    );
+    // 2. Prevent duplicate applications
+    const alreadyApplied = await Application.findOne({ 
+      jobId: jobId, 
+      seekerId: seekerId 
+    });
 
     if (alreadyApplied) {
       return res.status(400).json({ message: "You have already applied for this job." });
     }
 
-    // Create the exact format you requested
-    const newApplication = {
-      id: "APP-" + Date.now(),
+    // 3. Create the application in MongoDB
+    const newApplication = new Application({
       jobId,
       seekerId,
-      status: "pending",
-      appliedAt: new Date().toISOString(),
-      notes: notes || ""
-    };
+      notes: notes || "",
+      // Note: 'status' defaults to 'pending' via your schema
+      // 'createdAt' and 'updatedAt' are handled automatically by Mongoose timestamps!
+    });
 
-    applications.push(newApplication);
-    saveApplications(applications);
+    await newApplication.save();
 
     res.status(201).json({
       message: "Application submitted successfully",
@@ -65,58 +50,76 @@ exports.applyForJob = (req, res) => {
   }
 };
 
-const jobsFile = path.join(__dirname, "../../data/jobs.json");
-const getJobs = () => {
-  try {
-    if (!fs.existsSync(jobsFile)) return [];
-    const data = fs.readFileSync(jobsFile, "utf-8");
-    return data ? JSON.parse(data) : [];
-  } catch (error) {
-    return [];
-  }
-};
-
-// PATCH /shortlist/:applicationId (Employer Only)
-exports.shortlistApplication = (req, res) => {
+// ================= PATCH /shortlist/:applicationId =================
+exports.shortlistApplication = async (req, res) => {
   try {
     const { applicationId } = req.params;
-    const employerId = req.user.id; // From the Bouncer
+    const employerId = req.user.id; // From the Bouncer middleware
 
-    const applications = getApplications();
-    const jobs = getJobs();
-
-    // 1. Find the specific application
-    const appIndex = applications.findIndex(app => app.id === applicationId);
-    if (appIndex === -1) {
+    // 1. Find the application and magically pull in the linked Job data
+    const application = await Application.findById(applicationId).populate('jobId');
+    
+    if (!application) {
       return res.status(404).json({ message: "Application not found." });
     }
 
-    const application = applications[appIndex];
-
-    // 2. Find the job this application belongs to
-    const job = jobs.find(j => j.id === application.jobId);
-    if (!job) {
-      return res.status(404).json({ message: "The job for this application no longer exists." });
-    }
-
-    // 3. Security Check: Does this employer actually own this job?
-    if (job.postedBy !== employerId) {
+    // 2. Security Check: Does this employer actually own the job?
+    // Because we used .populate('jobId'), application.jobId is now the full job object!
+    if (!application.jobId || application.jobId.postedBy.toString() !== employerId) {
       return res.status(403).json({ 
         message: "Forbidden: You can only shortlist applicants for your own jobs." 
       });
     }
 
-    // 4. Update the status
-    applications[appIndex].status = "shortlisted";
-    saveApplications(applications);
+    // 3. Update the status
+    // *Important Note*: In our schema, we set the allowed statuses to: 
+    // ['pending', 'reviewed', 'interviewing', 'accepted', 'rejected']
+    // So we will use 'reviewed' here instead of 'shortlisted' to match the database rules.
+    application.status = "reviewed"; 
+    
+    await application.save();
 
     res.json({
-      message: "Application successfully shortlisted!",
-      application: applications[appIndex]
+      message: "Application successfully reviewed!",
+      application
     });
 
   } catch (error) {
     console.error("Shortlist Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// GET /api/applications/my-applications
+exports.getMyAppliedJobIds = async (req, res) => {
+    try {
+        const seekerId = req.user.id;
+        
+        // Find all applications by this seeker, but only return the jobId field
+        const applications = await Application.find({ seekerId }).select('jobId');
+        
+        // Extract just the IDs into a flat array: ["ID1", "ID2", ...]
+        const appliedJobIds = applications.map(app => app.jobId.toString());
+
+        res.status(200).json(appliedJobIds);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching application status" });
+    }
+};
+
+// GET /api/applications/my-applications
+exports.getSeekerApplications = async (req, res) => {
+  try {
+    const seekerId = req.user.id;
+
+    // Find applications and pull in the Job details
+    const applications = await Application.find({ seekerId })
+      .populate('jobId', 'title companyName location')
+      .sort({ createdAt: -1 }); // Newest first
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching seeker applications:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
