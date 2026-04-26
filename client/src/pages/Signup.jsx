@@ -18,7 +18,6 @@ export default function Signup() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ================= STANDARD SIGNUP LOGIC =================
   const handleStandardSignup = async (e) => {
     e.preventDefault();
     setError(null);
@@ -35,9 +34,6 @@ export default function Signup() {
         role: role
       });
 
-      console.log("Signup Success:", res.data);
-      
-      // Update AuthContext and navigate home
       login(res.data.user, res.data.token); 
       navigate("/"); 
 
@@ -47,19 +43,15 @@ export default function Signup() {
     }
   };
 
-  // ================= GOOGLE SIGNUP LOGIC =================
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const res = await axios.post("http://localhost:5000/api/auth/google", {
         token: credentialResponse.credential,
-        role: role // We pass the selected role along with Google data
+        role: role 
       });
-
-      console.log("Google Signup Success:", res.data);
       
       login(res.data.user, res.data.token);
       navigate("/");
-
     } catch (err) {
       console.error("Google signup failed", err);
       setError("Google authentication failed.");
@@ -70,7 +62,7 @@ export default function Signup() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <main className="flex-1 flex flex-col lg:flex-row bg-white dark:bg-slate-900 rounded-[40px] shadow-[0_20px_70px_-10px_rgba(110,95,240,0.1)] border border-slate-100 dark:border-slate-800 overflow-hidden">
         
-        {/* LEFT SECTION: Visual/Benefits */}
+        {/* LEFT SECTION */}
         <div className="lg:w-1/2 bg-gradient-to-br from-[#F8F7FF] to-[#EFEDFF] dark:from-slate-800 dark:to-slate-900 p-12 flex flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
             <span className="inline-block bg-white dark:bg-slate-700 px-4 py-1.5 rounded-full text-[11px] font-bold text-[#9E90FE] shadow-sm uppercase tracking-widest mb-6 border border-white dark:border-slate-600">
@@ -109,27 +101,32 @@ export default function Signup() {
           {error && <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm font-bold rounded-xl border border-red-100">{error}</div>}
 
           <form className="space-y-5" onSubmit={handleStandardSignup}>
-            {/* Full Name Input */}
+            
+            {/* ✅ DYNAMIC NAME INPUT */}
             <div>
-              <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">Full Name</label>
+              <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                {role === 'employer' ? 'Company Name' : 'Full Name'}
+              </label>
               <div className="relative">
                 <User className="absolute left-4 top-3.5 text-slate-400" size={18} />
                 <input 
                   type="text" name="name" value={form.name} onChange={handleChange} required
-                  placeholder="Your Name" 
+                  placeholder={role === 'employer' ? "e.g. Google, Microsoft" : "Arnav Saini"} 
                   className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                 />
               </div>
             </div>
 
-            {/* Email Input */}
+            {/* ✅ DYNAMIC EMAIL INPUT */}
             <div>
-              <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">Email Address</label>
+              <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                {role === 'employer' ? 'Company Email' : 'Email Address'}
+              </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-3.5 text-slate-400" size={18} />
                 <input 
                   type="email" name="email" value={form.email} onChange={handleChange} required
-                  placeholder="you@example.com" 
+                  placeholder={role === 'employer' ? "hr@company.com" : "you@example.com"} 
                   className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                 />
               </div>
@@ -190,14 +187,7 @@ export default function Signup() {
           </div>
 
           <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => setError("Google Signup failed")}
-              theme="outline"
-              shape="pill"
-              width="350px"
-              text="signup_with"
-            />
+            <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => setError("Google Signup failed")} theme="outline" shape="pill" width="350px" text="signup_with" />
           </div>
 
           <p className="mt-8 text-center text-sm font-bold text-slate-400">

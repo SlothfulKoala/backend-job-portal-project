@@ -14,7 +14,7 @@ exports.requireAuth = (req, res, next) => {
         const token = authHeader.split(" ")[1];
 
         // 4. Verify the token using your secret key
-        const decoded = jwt.verify(token, "BEE@JPP");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "BEE@JPP");
 
         // 5. Attach the decoded payload { id, role } to the request!
         req.user = decoded;

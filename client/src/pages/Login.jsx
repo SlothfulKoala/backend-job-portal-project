@@ -9,9 +9,9 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
+  
   const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -95,13 +95,17 @@ export default function Login() {
           {error && <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm font-bold rounded-xl border border-red-100">{error}</div>}
 
           <form className="space-y-6" onSubmit={handleStandardLogin}>
+            
+            {/* ✅ COMBINED EMAIL INPUT */}
             <div>
-              <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-3">Email Address</label>
+              <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-3">
+                Email / Company Email
+              </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-4 text-slate-400" size={20} />
                 <input 
                   type="email" name="email" value={form.email} onChange={handleChange} required
-                  placeholder="you@example.com" // ✅ Added Placeholder
+                  placeholder="you@example.com / hr@company.com" 
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white"
                 />
               </div>
@@ -113,7 +117,7 @@ export default function Login() {
                 <Lock className="absolute left-4 top-4 text-slate-400" size={20} />
                 <input 
                   type={showPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange} required
-                  placeholder="••••••••" // ✅ Added Placeholder
+                  placeholder="••••••••" 
                   className="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-slate-400 hover:text-[#9E90FE]">
