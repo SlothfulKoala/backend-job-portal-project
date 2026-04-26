@@ -1,0 +1,39 @@
+# --- Dependencies & Build ---
+# Catches node_modules and build folders in root, /client, and /server
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+
+# --- Environment & Secrets ---
+# Crucial: Keeps your MongoDB URI and API keys off GitHub
+**/.env
+**/.env.local
+**/.env.*.local
+**/*.local
+
+# --- Logs ---
+# Standard error and debug logs
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+
+# --- Editor & IDE ---
+# Keeps your team's specific VS Code or WebStorm settings private
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- Operating System ---
+# System-specific junk (Mac/Windows)
+.DS_Store
+Thumbs.db
