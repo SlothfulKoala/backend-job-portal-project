@@ -6,20 +6,19 @@ import axios from "axios";
 import { AuthContext } from '../context/AuthContext';
 
 export default function Signup() {
-  const [form, setForm] = useState({ fullName: "", email: "", password: "", confirmPassword: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('seeker'); 
   const [error, setError] = useState(null);
+
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // --- NEW: STANDARD EMAIL/PASSWORD SIGNUP ---
-  // 1. Grab the login function
-  const { login } = useContext(AuthContext);
-  const navigate = useNavigate(); // Make sure this is declared at the top of your component!
-
+  // ================= STANDARD SIGNUP LOGIC =================
   const handleStandardSignup = async (e) => {
     e.preventDefault();
     setError(null);
@@ -29,19 +28,17 @@ export default function Signup() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/register", {
-        name: form.fullName,
+      const res = await axios.post("http://localhost:5000/api/auth/signup", {
+        name: form.name,
         email: form.email,
         password: form.password,
         role: role
       });
 
-      console.log("Registered User:", res.data);
+      console.log("Signup Success:", res.data);
       
-      // 2. Use your Context function
+      // Update AuthContext and navigate home
       login(res.data.user, res.data.token); 
-      
-      // 3. Navigate home
       navigate("/"); 
 
     } catch (err) {
@@ -50,18 +47,22 @@ export default function Signup() {
     }
   };
 
-  // --- TEAMMATE's GOOGLE SIGNUP (Untouched) ---
+  // ================= GOOGLE SIGNUP LOGIC =================
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/google",
-        { token: credentialResponse.credential, role: role }
-      );
-      console.log("User:", res.data);
-      localStorage.setItem("user", JSON.stringify(res.data));
-      window.location.href = "/";
+      const res = await axios.post("http://localhost:5000/api/auth/google", {
+        token: credentialResponse.credential,
+        role: role // We pass the selected role along with Google data
+      });
+
+      console.log("Google Signup Success:", res.data);
+      
+      login(res.data.user, res.data.token);
+      navigate("/");
+
     } catch (err) {
       console.error("Google signup failed", err);
+      setError("Google authentication failed.");
     }
   };
 
@@ -69,7 +70,7 @@ export default function Signup() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <main className="flex-1 flex flex-col lg:flex-row bg-white dark:bg-slate-900 rounded-[40px] shadow-[0_20px_70px_-10px_rgba(110,95,240,0.1)] border border-slate-100 dark:border-slate-800 overflow-hidden">
         
-        {/* LEFT SECTION (Unchanged) */}
+        {/* LEFT SECTION: Visual/Benefits */}
         <div className="lg:w-1/2 bg-gradient-to-br from-[#F8F7FF] to-[#EFEDFF] dark:from-slate-800 dark:to-slate-900 p-12 flex flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
             <span className="inline-block bg-white dark:bg-slate-700 px-4 py-1.5 rounded-full text-[11px] font-bold text-[#9E90FE] shadow-sm uppercase tracking-widest mb-6 border border-white dark:border-slate-600">
@@ -79,28 +80,19 @@ export default function Signup() {
               Join <span className="text-[#9E90FE]">CareerVista</span> today!
             </h1>
             <p className="text-slate-500 dark:text-slate-400 text-base leading-relaxed max-w-xs">
-              Create your account and take the first step towards your dream career.
+              The first step towards your professional breakthrough starts here.
             </p>
           </div>
 
           <div className="relative flex items-center justify-center py-6">
             <div className="absolute w-72 h-72 bg-[#9E90FE]/10 rounded-full blur-3xl"></div>
             <div className="relative z-10 bg-white dark:bg-slate-800 p-10 rounded-[3rem] shadow-2xl border border-purple-50 dark:border-slate-700 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-2">
-                 <div className="flex -space-x-4">
-                    <div className="w-12 h-12 rounded-full bg-purple-400 border-4 border-white dark:border-slate-900"></div>
-                    <div className="w-12 h-12 rounded-full bg-blue-400 border-4 border-white dark:border-slate-900"></div>
-                    <div className="w-12 h-12 rounded-full bg-indigo-400 border-4 border-white dark:border-slate-900 flex items-center justify-center text-white text-xs font-bold">+</div>
-                 </div>
-                 <div className="h-2 w-24 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden mt-4">
-                    <div className="h-full w-2/3 bg-[#9E90FE]"></div>
-                 </div>
-              </div>
+               <User size={80} className="text-[#9E90FE]" strokeWidth={1} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3 relative z-10">
-            {['Personalized Job Matches', 'Quick & Easy Application', 'Track Your Progress', 'Get Hired Faster'].map((text) => (
+            {['Personalized Job Matches', 'Quick & Easy Application', 'Track Your Progress'].map((text) => (
               <div key={text} className="flex items-center gap-3 text-[13px] font-bold text-slate-600 dark:text-slate-300">
                 <CheckCircle2 size={18} className="text-[#9E90FE]" />
                 {text}
@@ -109,48 +101,49 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* RIGHT SECTION: Form */}
+        {/* RIGHT SECTION: Signup Form */}
         <div className="lg:w-1/2 p-10 lg:p-16 flex flex-col justify-center bg-white dark:bg-slate-900 overflow-y-auto">
           <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Create your account</h2>
-          <p className="text-slate-400 dark:text-slate-500 font-medium mb-6">Fill in the details to get started</p>
+          <p className="text-slate-400 dark:text-slate-500 font-medium mb-6">Enter your details to get started</p>
 
-          {/* Form Error Message */}
           {error && <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm font-bold rounded-xl border border-red-100">{error}</div>}
 
-          {/* WIRED UP ONSUBMIT HERE */}
           <form className="space-y-5" onSubmit={handleStandardSignup}>
+            {/* Full Name Input */}
             <div>
               <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">Full Name</label>
               <div className="relative">
                 <User className="absolute left-4 top-3.5 text-slate-400" size={18} />
                 <input 
-                  type="text" name="fullName" onChange={handleChange} required
-                  placeholder="Enter your full name" 
+                  type="text" name="name" value={form.name} onChange={handleChange} required
+                  placeholder="Your Name" 
                   className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                 />
               </div>
             </div>
 
+            {/* Email Input */}
             <div>
               <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-3.5 text-slate-400" size={18} />
                 <input 
-                  type="email" name="email" onChange={handleChange} required
-                  placeholder="Enter your email" 
+                  type="email" name="email" value={form.email} onChange={handleChange} required
+                  placeholder="you@example.com" 
                   className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                 />
               </div>
             </div>
 
+            {/* Password Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
                   <input 
-                    type={showPassword ? "text" : "password"} name="password" onChange={handleChange} required minLength={6}
-                    placeholder="Password" 
+                    type={showPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange} required minLength={6}
+                    placeholder="••••••••" 
                     className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                   />
                 </div>
@@ -160,8 +153,8 @@ export default function Signup() {
                 <div className="relative">
                   <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
                   <input 
-                    type={showPassword ? "text" : "password"} name="confirmPassword" onChange={handleChange} required minLength={6}
-                    placeholder="Confirm" 
+                    type={showPassword ? "text" : "password"} name="confirmPassword" value={form.confirmPassword} onChange={handleChange} required
+                    placeholder="••••••••" 
                     className="w-full pl-12 pr-10 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-slate-400 hover:text-[#9E90FE]">
@@ -171,6 +164,7 @@ export default function Signup() {
               </div>
             </div>
 
+            {/* Role Selection */}
             <div>
               <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-3">I am a</label>
               <div className="grid grid-cols-2 gap-4">
@@ -185,7 +179,6 @@ export default function Signup() {
               </div>
             </div>
 
-            {/* Added type="submit" */}
             <button type="submit" className="w-full py-4 bg-gradient-to-r from-[#B5ACFF] to-[#9E90FE] text-white font-black rounded-2xl shadow-xl shadow-purple-200 dark:shadow-none hover:shadow-2xl transition-all transform active:scale-95">
               Create Account
             </button>
@@ -199,8 +192,7 @@ export default function Signup() {
           <div className="flex justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
-              onError={() => console.log("Login Failed")}
-              useOneTap
+              onError={() => setError("Google Signup failed")}
               theme="outline"
               shape="pill"
               width="350px"
