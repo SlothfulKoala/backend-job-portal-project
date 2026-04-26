@@ -1,12 +1,13 @@
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 const app = require("./src/app"); 
 const connectDB = require("./src/config/db");
-const PORT = process.env.PORT || 5000; 
- 
-// Connect to MongoDB first
+
+const PORT = process.env.PORT || 5001;
+console.log("MONGO_URI:", process.env.MONGO_URI);
+
+// connect DB first
 connectDB().then(() => {
-  // Then start the server
   app.listen(PORT, () => { 
-    console.log(`Server running on port http://localhost:${PORT}`); 
+    console.log(`Server running on http://localhost:${PORT}`); 
   });
 });

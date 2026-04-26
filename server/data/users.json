@@ -58,5 +58,13 @@
     "email": "test@test.com",
     "password": "$2b$10$FZzh5N4Kw2O1GLU.DPRGY.QUyMiyVv4M8JYuMpaNx7JcCz7vYHxDa",
     "role": "seeker"
+  },
+  {
+    "userId": "USER-1777219005314",
+    "name": "Anish",
+    "email": "anish@test.com",
+    "password": "$2b$10$nIZeFJH8vQaOqAiNqsa2xOpBSTBcP3Jj3CB4WgzMT4XOZKIZyK2GC",
+    "role": "seeker",
+    "profilePic": "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg"
   }
 ]
