@@ -30,12 +30,12 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-[100] flex justify-between items-center px-8 py-4 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 transition-all duration-500">
+    <header className="sticky top-0 z-100 flex justify-between items-center px-8 py-4 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 transition-all duration-500">
         
         {/* LOGO (Teammate's FontAwesome UI) */}
         <Link to="/" className="flex items-center gap-2.5 text-[22px] font-bold text-gray-900 dark:text-white transition-colors">
             {/* Note: I swapped bg-linear to bg-gradient to ensure it works across Tailwind versions */}
-            <i className="fa-brands fa-envira text-2xl bg-gradient-to-br from-[#4f46e5] to-[#ec4899] bg-clip-text text-transparent"></i> 
+            <i className="fa-brands fa-envira text-2xl bg-linear-to-br from-[#4f46e5] to-[#ec4899] bg-clip-text text-transparent"></i> 
             CareerVista
         </Link>
         
@@ -93,7 +93,7 @@ const Header = () => {
                     <Link to="/login" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                         Log In
                     </Link>
-                    <Link to="/signup" className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white px-5 py-2 rounded-full shadow-sm transition-all hover:shadow-md">
+                    <Link to="/signup" className="text-sm font-semibold bg-linear-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white px-5 py-2 rounded-full shadow-sm transition-all hover:shadow-md">
                         Sign Up
                     </Link>
                 </div>
