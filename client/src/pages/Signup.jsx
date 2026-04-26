@@ -1,28 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Mail, Lock, Eye, EyeOff, User, Building2, CheckCircle2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
+import { AuthContext } from '../context/AuthContext';
 
 export default function Signup() {
   const [form, setForm] = useState({ fullName: "", email: "", password: "", confirmPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState('seeker'); // 'seeker' or 'employer'
+  const [role, setRole] = useState('seeker'); 
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // --- NEW: STANDARD EMAIL/PASSWORD SIGNUP ---
+  // 1. Grab the login function
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate(); // Make sure this is declared at the top of your component!
+
+  const handleStandardSignup = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    if (form.password !== form.confirmPassword) {
+      return setError("Passwords do not match!");
+    }
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/auth/register", {
+        name: form.fullName,
+        email: form.email,
+        password: form.password,
+        role: role
+      });
+
+      console.log("Registered User:", res.data);
+      
+      // 2. Use your Context function
+      login(res.data.user, res.data.token); 
+      
+      // 3. Navigate home
+      navigate("/"); 
+
+    } catch (err) {
+      console.error("Signup failed", err);
+      setError(err.response?.data?.message || "Registration failed. Try again.");
+    }
+  };
+
+  // --- TEAMMATE's GOOGLE SIGNUP (Untouched) ---
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/auth/google",
-        {
-          token: credentialResponse.credential,
-          role: role // Pass the selected role to the backend
-        }
+        { token: credentialResponse.credential, role: role }
       );
-
       console.log("User:", res.data);
       localStorage.setItem("user", JSON.stringify(res.data));
       window.location.href = "/";
@@ -35,7 +69,7 @@ export default function Signup() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <main className="flex-1 flex flex-col lg:flex-row bg-white dark:bg-slate-900 rounded-[40px] shadow-[0_20px_70px_-10px_rgba(110,95,240,0.1)] border border-slate-100 dark:border-slate-800 overflow-hidden">
         
-        {/* LEFT SECTION: Branding & Visuals */}
+        {/* LEFT SECTION (Unchanged) */}
         <div className="lg:w-1/2 bg-gradient-to-br from-[#F8F7FF] to-[#EFEDFF] dark:from-slate-800 dark:to-slate-900 p-12 flex flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
             <span className="inline-block bg-white dark:bg-slate-700 px-4 py-1.5 rounded-full text-[11px] font-bold text-[#9E90FE] shadow-sm uppercase tracking-widest mb-6 border border-white dark:border-slate-600">
@@ -49,7 +83,6 @@ export default function Signup() {
             </p>
           </div>
 
-          {/* Signup Illustration Icon */}
           <div className="relative flex items-center justify-center py-6">
             <div className="absolute w-72 h-72 bg-[#9E90FE]/10 rounded-full blur-3xl"></div>
             <div className="relative z-10 bg-white dark:bg-slate-800 p-10 rounded-[3rem] shadow-2xl border border-purple-50 dark:border-slate-700 flex items-center justify-center">
@@ -79,43 +112,44 @@ export default function Signup() {
         {/* RIGHT SECTION: Form */}
         <div className="lg:w-1/2 p-10 lg:p-16 flex flex-col justify-center bg-white dark:bg-slate-900 overflow-y-auto">
           <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Create your account</h2>
-          <p className="text-slate-400 dark:text-slate-500 font-medium mb-8">Fill in the details to get started</p>
+          <p className="text-slate-400 dark:text-slate-500 font-medium mb-6">Fill in the details to get started</p>
 
-          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-            {/* Full Name */}
+          {/* Form Error Message */}
+          {error && <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm font-bold rounded-xl border border-red-100">{error}</div>}
+
+          {/* WIRED UP ONSUBMIT HERE */}
+          <form className="space-y-5" onSubmit={handleStandardSignup}>
             <div>
               <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">Full Name</label>
               <div className="relative">
                 <User className="absolute left-4 top-3.5 text-slate-400" size={18} />
                 <input 
-                  type="text" name="fullName" onChange={handleChange}
+                  type="text" name="fullName" onChange={handleChange} required
                   placeholder="Enter your full name" 
                   className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                 />
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-3.5 text-slate-400" size={18} />
                 <input 
-                  type="email" name="email" onChange={handleChange}
+                  type="email" name="email" onChange={handleChange} required
                   placeholder="Enter your email" 
                   className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                 />
               </div>
             </div>
 
-            {/* Password Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
                   <input 
-                    type={showPassword ? "text" : "password"} name="password" onChange={handleChange}
+                    type={showPassword ? "text" : "password"} name="password" onChange={handleChange} required minLength={6}
                     placeholder="Password" 
                     className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                   />
@@ -126,7 +160,7 @@ export default function Signup() {
                 <div className="relative">
                   <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
                   <input 
-                    type={showPassword ? "text" : "password"} name="confirmPassword" onChange={handleChange}
+                    type={showPassword ? "text" : "password"} name="confirmPassword" onChange={handleChange} required minLength={6}
                     placeholder="Confirm" 
                     className="w-full pl-12 pr-10 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white" 
                   />
@@ -137,7 +171,6 @@ export default function Signup() {
               </div>
             </div>
 
-            {/* Role Selection */}
             <div>
               <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-3">I am a</label>
               <div className="grid grid-cols-2 gap-4">
@@ -152,7 +185,8 @@ export default function Signup() {
               </div>
             </div>
 
-            <button className="w-full py-4 bg-gradient-to-r from-[#B5ACFF] to-[#9E90FE] text-white font-black rounded-2xl shadow-xl shadow-purple-200 dark:shadow-none hover:shadow-2xl transition-all transform active:scale-95">
+            {/* Added type="submit" */}
+            <button type="submit" className="w-full py-4 bg-gradient-to-r from-[#B5ACFF] to-[#9E90FE] text-white font-black rounded-2xl shadow-xl shadow-purple-200 dark:shadow-none hover:shadow-2xl transition-all transform active:scale-95">
               Create Account
             </button>
           </form>
@@ -162,7 +196,6 @@ export default function Signup() {
             <span className="relative bg-white dark:bg-slate-900 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">or continue with</span>
           </div>
 
-          {/* REAL GOOGLE SIGNUP BUTTON */}
           <div className="flex justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
@@ -171,7 +204,7 @@ export default function Signup() {
               theme="outline"
               shape="pill"
               width="350px"
-              text="signup_with" // Changes button text to "Sign up with Google"
+              text="signup_with"
             />
           </div>
 

@@ -1,27 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Mail, Lock, Eye, EyeOff, UserSearch } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
-
+import { AuthContext } from '../context/AuthContext';
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // --- NEW: STANDARD EMAIL/PASSWORD LOGIN ---
+  // 1. Grab the login function from context
+  const { login } = useContext(AuthContext); 
+
+  const handleStandardLogin = async (e) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email: form.email,
+        password: form.password
+      });
+      
+      console.log("Logged In User:", res.data);
+      
+      // 2. Use your Context function! (Pass the user object and the token)
+      // Assuming your backend sends { user: {...}, token: "..." }
+      login(res.data.user, res.data.token); 
+      
+      // 3. React Router navigation (No page refresh required)
+      navigate("/"); 
+
+    } catch (err) {
+      console.error("Login failed", err);
+      setError(err.response?.data?.message || "Invalid email or password");
+    }
+  };
+
+  // --- TEAMMATE's GOOGLE LOGIN (Untouched) ---
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/auth/google",
-        {
-          token: credentialResponse.credential,
-        }
+        { token: credentialResponse.credential }
       );
-
       console.log("User:", res.data);
       localStorage.setItem("user", JSON.stringify(res.data));
       window.location.href = "/";
@@ -31,12 +59,11 @@ export default function Login() {
   };
 
   return (
-    // Wrap with Provider. Replace 'YOUR_GOOGLE_CLIENT_ID' with your actual ID from Google Console
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <main className="flex-1 flex flex-col lg:flex-row bg-white dark:bg-slate-900 rounded-[40px] shadow-[0_20px_70px_-10px_rgba(110,95,240,0.1)] border border-slate-100 dark:border-slate-800 overflow-hidden">
         
-        {/* LEFT SECTION: Image/Illustration Area */}
-        <div className="lg:w-1/2 bg-linear-to-br from-[#F8F7FF] to-[#EFEDFF] dark:from-slate-800 dark:to-slate-900 p-12 flex flex-col justify-between relative overflow-hidden">
+        {/* LEFT SECTION (Unchanged) */}
+        <div className="lg:w-1/2 bg-gradient-to-br from-[#F8F7FF] to-[#EFEDFF] dark:from-slate-800 dark:to-slate-900 p-12 flex flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
             <span className="inline-block bg-white dark:bg-slate-700 px-4 py-1.5 rounded-full text-[11px] font-bold text-[#9E90FE] shadow-sm uppercase tracking-widest mb-6 border border-white dark:border-slate-600">
               Welcome Back! 👋
@@ -69,15 +96,19 @@ export default function Login() {
         {/* RIGHT SECTION: Form */}
         <div className="lg:w-1/2 p-12 lg:p-20 flex flex-col justify-center bg-white dark:bg-slate-900">
           <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Login to your account</h2>
-          <p className="text-slate-400 font-medium mb-10">Enter your credentials to continue</p>
+          <p className="text-slate-400 font-medium mb-8">Enter your credentials to continue</p>
 
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          {/* Form Error Message */}
+          {error && <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm font-bold rounded-xl border border-red-100">{error}</div>}
+
+          {/* WIRED UP ONSUBMIT HERE */}
+          <form className="space-y-6" onSubmit={handleStandardLogin}>
             <div>
               <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-3">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-4 text-slate-400" size={20} />
                 <input 
-                  type="email" name="email" value={form.email} onChange={handleChange}
+                  type="email" name="email" value={form.email} onChange={handleChange} required
                   placeholder="Enter your email"
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white"
                 />
@@ -90,7 +121,7 @@ export default function Login() {
                 <Lock className="absolute left-4 top-4 text-slate-400" size={20} />
                 <input 
                   type={showPassword ? "text" : "password"} 
-                  name="password" value={form.password} onChange={handleChange}
+                  name="password" value={form.password} onChange={handleChange} required
                   placeholder="Enter your password"
                   className="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white"
                 />
@@ -100,7 +131,8 @@ export default function Login() {
               </div>
             </div>
 
-            <button className="w-full py-4 bg-linear-to-r from-[#B5ACFF] to-[#9E90FE] text-white font-black rounded-2xl shadow-xl shadow-purple-200 hover:shadow-2xl transition-all active:scale-95">
+            {/* Added type="submit" */}
+            <button type="submit" className="w-full py-4 bg-gradient-to-r from-[#B5ACFF] to-[#9E90FE] text-white font-black rounded-2xl shadow-xl shadow-purple-200 hover:shadow-2xl transition-all active:scale-95">
               Login
             </button>
           </form>
@@ -110,7 +142,6 @@ export default function Login() {
             <span className="relative bg-white dark:bg-slate-900 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">or continue with</span>
           </div>
 
-          {/* REAL GOOGLE LOGIN BUTTON */}
           <div className="flex justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
