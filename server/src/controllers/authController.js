@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcrypt");
+import dotenv from "dotenv";
+dotenv.config();
 const jwt = require("jsonwebtoken");
 
 const filePath = path.join(__dirname, "../../data/users.json");
@@ -45,7 +47,9 @@ exports.signup = async (req, res) => {
     }
 
     const userId = "USER-" + Date.now();
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const newUser = { 
         userId, 
