@@ -15,27 +15,26 @@ export default function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // --- NEW: STANDARD EMAIL/PASSWORD LOGIN ---
-  // 1. Grab the login function from context
-  const { login } = useContext(AuthContext); 
+  const { login } = useContext(AuthContext);
 
   const handleStandardLogin = async (e) => {
     e.preventDefault();
     setError(null);
+
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email: form.email,
-        password: form.password
-      });
-      
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/login",   // ✅ FIXED PORT
+        {
+          email: form.email,
+          password: form.password
+        }
+      );
+
       console.log("Logged In User:", res.data);
-      
-      // 2. Use your Context function! (Pass the user object and the token)
-      // Assuming your backend sends { user: {...}, token: "..." }
-      login(res.data.user, res.data.token); 
-      
-      // 3. React Router navigation (No page refresh required)
-      navigate("/"); 
+
+      login(res.data.user, res.data.token);
+
+      navigate("/");
 
     } catch (err) {
       console.error("Login failed", err);
@@ -43,16 +42,20 @@ export default function Login() {
     }
   };
 
-  // --- TEAMMATE's GOOGLE LOGIN (Untouched) ---
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/google",
+        "http://localhost:5000/api/auth/google",  // ✅ FIXED PORT
         { token: credentialResponse.credential }
       );
+
       console.log("User:", res.data);
-      localStorage.setItem("user", JSON.stringify(res.data));
-      window.location.href = "/";
+
+      // Optional: use context instead of localStorage for consistency
+      login(res.data.user, res.data.token);
+
+      navigate("/");
+
     } catch (err) {
       console.error("Google login failed", err);
     }
@@ -62,7 +65,6 @@ export default function Login() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <main className="flex-1 flex flex-col lg:flex-row bg-white dark:bg-slate-900 rounded-[40px] shadow-[0_20px_70px_-10px_rgba(110,95,240,0.1)] border border-slate-100 dark:border-slate-800 overflow-hidden">
         
-        {/* LEFT SECTION (Unchanged) */}
         <div className="lg:w-1/2 bg-gradient-to-br from-[#F8F7FF] to-[#EFEDFF] dark:from-slate-800 dark:to-slate-900 p-12 flex flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
             <span className="inline-block bg-white dark:bg-slate-700 px-4 py-1.5 rounded-full text-[11px] font-bold text-[#9E90FE] shadow-sm uppercase tracking-widest mb-6 border border-white dark:border-slate-600">
@@ -86,22 +88,25 @@ export default function Login() {
           <div className="grid grid-cols-2 gap-3 relative z-10">
             {['Thousands of Jobs', 'Verified Companies', 'Easy Application', 'Career Growth'].map((text) => (
               <div key={text} className="flex items-center gap-2 text-[12px] font-bold text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm p-2.5 rounded-2xl border border-white/50 dark:border-slate-700">
-                <div className="bg-[#9E90FE] rounded-full p-1"><div className="w-1.5 h-1.5 border-r-2 border-b-2 border-white rotate-45 transform -translate-y-0.5" /></div>
+                <div className="bg-[#9E90FE] rounded-full p-1">
+                  <div className="w-1.5 h-1.5 border-r-2 border-b-2 border-white rotate-45 transform -translate-y-0.5" />
+                </div>
                 {text}
               </div>
             ))}
           </div>
         </div>
 
-        {/* RIGHT SECTION: Form */}
         <div className="lg:w-1/2 p-12 lg:p-20 flex flex-col justify-center bg-white dark:bg-slate-900">
           <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Login to your account</h2>
           <p className="text-slate-400 font-medium mb-8">Enter your credentials to continue</p>
 
-          {/* Form Error Message */}
-          {error && <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm font-bold rounded-xl border border-red-100">{error}</div>}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm font-bold rounded-xl border border-red-100">
+              {error}
+            </div>
+          )}
 
-          {/* WIRED UP ONSUBMIT HERE */}
           <form className="space-y-6" onSubmit={handleStandardLogin}>
             <div>
               <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-3">Email Address</label>
@@ -109,7 +114,6 @@ export default function Login() {
                 <Mail className="absolute left-4 top-4 text-slate-400" size={20} />
                 <input 
                   type="email" name="email" value={form.email} onChange={handleChange} required
-                  placeholder="Enter your email"
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white"
                 />
               </div>
@@ -122,7 +126,6 @@ export default function Login() {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   name="password" value={form.password} onChange={handleChange} required
-                  placeholder="Enter your password"
                   className="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-slate-400 hover:text-[#9E90FE]">
@@ -131,26 +134,22 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Added type="submit" */}
             <button type="submit" className="w-full py-4 bg-gradient-to-r from-[#B5ACFF] to-[#9E90FE] text-white font-black rounded-2xl shadow-xl shadow-purple-200 hover:shadow-2xl transition-all active:scale-95">
               Login
             </button>
           </form>
 
           <div className="relative my-10 text-center">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100 dark:border-slate-800"></div></div>
-            <span className="relative bg-white dark:bg-slate-900 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">or continue with</span>
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-100 dark:border-slate-800"></div>
+            </div>
+            <span className="relative bg-white dark:bg-slate-900 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+              or continue with
+            </span>
           </div>
 
           <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => console.log("Login Failed")}
-              useOneTap
-              theme="outline"
-              shape="pill"
-              width="350px"
-            />
+            <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.log("Login Failed")} />
           </div>
 
           <p className="mt-10 text-center text-sm font-bold text-slate-400">
