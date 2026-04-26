@@ -31,11 +31,18 @@ const migrateData = async () => {
         // --- STEP 1: MIGRATE USERS ---
         console.log(`🚀 Migrating ${oldUsers.length} Users...`);
         for (const user of oldUsers) {
+            
+            // 👉 Skip admin users completely
+            if (user.role === 'admin') {
+                console.warn(`⚠️ Skipping admin user: ${user.email}`);
+                continue; 
+            }
+
             // Create a new Mongoose user instance
             const newUser = new User({
                 name: user.name,
                 email: user.email,
-                password: user.password, // Assume it's already hashed from your old authController
+                password: user.password,
                 role: user.role,
                 profilePic: user.profilePic || "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg",
                 profile: user.profile || { bio: '', resume: '', skills: [] },
