@@ -3,21 +3,27 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: false }, // false for Google Auth
+  password: { type: String, required: false }, // Optional for Google Auth
   googleId: { type: String, required: false },
   role: { type: String, enum: ['seeker', 'employer'], required: true },
-  profilePic: {
-    type: String,
-  },
+  profilePic: { type: String },
+  phone: { type: String, default: '' },
+  location: { type: String, default: '' },
   
-  // 1. Add the seeker profile object
+  // Flexible Links Array for both Seeker (GitHub/LeetCode) and Employer (Twitter/LinkedIn)
+  links: [{
+    name: { type: String, required: true }, // e.g., "GitHub"
+    url: { type: String, required: true }   // e.g., "https://github.com/aditya"
+  }],
+
+  // Seeker specific profile
   profile: {
     resume: { type: String, default: '' },
     skills: [{ type: String }],
     bio: { type: String, default: '' }
   },
 
-  // 2. Change companyDetails from String to an Object
+  // Employer specific profile
   companyDetails: {
     companyName: { type: String, default: '' },
     website: { type: String, default: '' },
