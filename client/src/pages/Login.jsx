@@ -11,29 +11,23 @@ export default function Login() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  const { login } = useContext(AuthContext);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
-  const { login } = useContext(AuthContext);
 
   const handleStandardLogin = async (e) => {
     e.preventDefault();
     setError(null);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",   // ✅ FIXED PORT
-        {
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
           email: form.email,
           password: form.password
-        }
-      );
-
-      console.log("Logged In User:", res.data);
+      });
 
       login(res.data.user, res.data.token);
-
       navigate("/");
 
     } catch (err) {
@@ -44,16 +38,11 @@ export default function Login() {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/google",  // ✅ FIXED PORT
-        { token: credentialResponse.credential }
-      );
+      const res = await axios.post("http://localhost:5000/api/auth/google", { 
+        token: credentialResponse.credential 
+      });
 
-      console.log("User:", res.data);
-
-      // Optional: use context instead of localStorage for consistency
       login(res.data.user, res.data.token);
-
       navigate("/");
 
     } catch (err) {
@@ -65,6 +54,7 @@ export default function Login() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <main className="flex-1 flex flex-col lg:flex-row bg-white dark:bg-slate-900 rounded-[40px] shadow-[0_20px_70px_-10px_rgba(110,95,240,0.1)] border border-slate-100 dark:border-slate-800 overflow-hidden">
         
+        {/* LEFT SECTION */}
         <div className="lg:w-1/2 bg-gradient-to-br from-[#F8F7FF] to-[#EFEDFF] dark:from-slate-800 dark:to-slate-900 p-12 flex flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
             <span className="inline-block bg-white dark:bg-slate-700 px-4 py-1.5 rounded-full text-[11px] font-bold text-[#9E90FE] shadow-sm uppercase tracking-widest mb-6 border border-white dark:border-slate-600">
@@ -97,15 +87,12 @@ export default function Login() {
           </div>
         </div>
 
+        {/* RIGHT SECTION */}
         <div className="lg:w-1/2 p-12 lg:p-20 flex flex-col justify-center bg-white dark:bg-slate-900">
           <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Login to your account</h2>
           <p className="text-slate-400 font-medium mb-8">Enter your credentials to continue</p>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm font-bold rounded-xl border border-red-100">
-              {error}
-            </div>
-          )}
+          {error && <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm font-bold rounded-xl border border-red-100">{error}</div>}
 
           <form className="space-y-6" onSubmit={handleStandardLogin}>
             <div>
@@ -114,6 +101,7 @@ export default function Login() {
                 <Mail className="absolute left-4 top-4 text-slate-400" size={20} />
                 <input 
                   type="email" name="email" value={form.email} onChange={handleChange} required
+                  placeholder="you@example.com" // ✅ Added Placeholder
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white"
                 />
               </div>
@@ -124,8 +112,8 @@ export default function Login() {
               <div className="relative">
                 <Lock className="absolute left-4 top-4 text-slate-400" size={20} />
                 <input 
-                  type={showPassword ? "text" : "password"} 
-                  name="password" value={form.password} onChange={handleChange} required
+                  type={showPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange} required
+                  placeholder="••••••••" // ✅ Added Placeholder
                   className="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-100 outline-none transition-all dark:text-white"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-slate-400 hover:text-[#9E90FE]">
@@ -140,12 +128,8 @@ export default function Login() {
           </form>
 
           <div className="relative my-10 text-center">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-100 dark:border-slate-800"></div>
-            </div>
-            <span className="relative bg-white dark:bg-slate-900 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">
-              or continue with
-            </span>
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100 dark:border-slate-800"></div></div>
+            <span className="relative bg-white dark:bg-slate-900 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">or continue with</span>
           </div>
 
           <div className="flex justify-center">
