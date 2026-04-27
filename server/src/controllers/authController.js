@@ -1,6 +1,8 @@
 const User = require('../models/User'); // Ensure the casing matches your file name!
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ================= SIGNUP =================
 exports.signup = async (req, res) => {
@@ -104,5 +106,47 @@ exports.login = async (req, res) => {
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.googleAuth = async (req, res) => {
+  try {
+    const { token, role } = req.body; // Frontend sends the Google token and chosen role
+
+    // 1. Verify the Google Token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: "4769970276-vcl5qe8l07j75odehsefva53vctol33e.apps.googleusercontent.com", 
+    });
+    
+    const { name, email, picture } = ticket.getPayload();
+
+    // 2. Check if user already exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // 3. If they don't exist, create a new account
+      user = new User({
+        name,
+        email,
+        profilePic: picture,
+        role: role || 'seeker', // Default to seeker if none provided
+        // Note: Google accounts don't use passwords in your DB
+      });
+      await user.save();
+    }
+
+    // 4. Generate your app's JWT token
+    const jwtToken = jwt.sign(
+      { id: user._id, role: user.role }, 
+      process.env.JWT_SECRET, // Make sure you have this in your .env
+      { expiresIn: '1d' }
+    );
+
+    res.status(200).json({ token: jwtToken, user, message: "Google Login Successful" });
+
+  } catch (error) {
+    console.error("Google Auth Error:", error);
+    res.status(500).json({ message: "Failed to authenticate with Google" });
   }
 };
