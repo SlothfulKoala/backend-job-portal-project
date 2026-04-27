@@ -8,7 +8,7 @@ router.patch('/shortlist/:applicationId', requireAuth, authorizeRole('employer')
 
 // --- Seeker Routes ---
 // 1. Apply for a job
-router.post('/apply/:jobId', requireAuth, authorizeRole('seeker'), applicationController.applyForJob);
+router.post('/apply/:jobId', requireAuth, authorizeRole('seeker'),  applicationController.applyForJob);
 
 // 2. Just get IDs (Used for graying out buttons on Home page)
 router.get('/applied-ids', requireAuth, authorizeRole('seeker'), applicationController.getMyAppliedJobIds);

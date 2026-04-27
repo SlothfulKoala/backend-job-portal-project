@@ -1,4 +1,4 @@
-const Job = require('../models/job'); // Ensure this matches your filename
+const Job = require('../models/Job'); // Ensure this matches your filename
 const Application = require('../models/application'); 
 const User = require('../models/User');
 

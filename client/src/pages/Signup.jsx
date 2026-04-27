@@ -105,7 +105,7 @@ export default function Signup() {
             {/* ✅ DYNAMIC NAME INPUT */}
             <div>
               <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
-                {role === 'employer' ? 'Company Name' : 'Full Name'}
+                {role === 'employer' ? 'Full Name' : 'Full Name'}
               </label>
               <div className="relative">
                 <User className="absolute left-4 top-3.5 text-slate-400" size={18} />

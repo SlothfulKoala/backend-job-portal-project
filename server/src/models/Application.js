@@ -30,5 +30,4 @@ const applicationSchema = new mongoose.Schema({
 });
 
 // Make sure the export name matches exactly what your controller is looking for!
-// ✅ Change the bottom line to this:
-module.exports = mongoose.models.Application || mongoose.model('Application', applicationSchema);
+module.exports = mongoose.model('Application', applicationSchema);
