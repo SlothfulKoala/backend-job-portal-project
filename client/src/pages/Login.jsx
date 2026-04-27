@@ -137,7 +137,14 @@ export default function Login() {
           </div>
 
           <div className="flex justify-center">
-            <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.log("Login Failed")} />
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Google Login failed")} 
+              theme="outline"
+              shape="pill"
+              width="350px"
+              text="signin_with" 
+            />
           </div>
 
           <p className="mt-10 text-center text-sm font-bold text-slate-400">
