@@ -1,17 +1,28 @@
 const mongoose = require('mongoose');
 
 const jobSchema = new mongoose.Schema({
+  // 1. Core Job Details
   title: { 
     type: String, 
     required: true,
-    trim: true 
+    trim: true // Kept from your branch to prevent accidental spacing issues
   },
   type: { 
     type: String, 
     enum: ['full-time', 'part-time', 'contract', 'internship', 'freelance'],
-    required: true 
+    required: true // Kept from your branch for filtering
   },
   category: { 
+    type: String, 
+    required: true // Kept from your branch for categorization
+  },
+  location: { 
+    type: String, 
+    required: true 
+  },
+  salary: { 
+    // Using String (from main) instead of your Number. 
+    // This prevents crashes if your teammate's frontend sends ranges like "50,000 - 60,000"
     type: String, 
     required: true 
   },
@@ -19,26 +30,33 @@ const jobSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  company: { 
+  
+  // 2. Employer Context
+  companyName: { 
+    // Unified your "company" and their "companyName" into one field
+    // to match what their frontend is likely expecting
     type: String, 
     required: true 
   },
-  location: { 
+  contactEmail: { 
     type: String, 
-    required: true 
+    required: true // Added by main
   },
-  salary: { 
-    type: Number, 
-    required: true 
-  },
-  postedBy: { 
-    // The true Mongoose relational link to the Employer
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true 
+
+  // 3. Skills Array
+  skills: [{ 
+    type: String // Added by main
+  }], 
+  
+  // 4. Relational Data: Links this job permanently to the Employer
+  postedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 }, { 
-  timestamps: true // Automatically handles your old "postedAt" logic
+  // Automatically adds `createdAt` and `updatedAt` timestamps
+  timestamps: true 
 });
 
 module.exports = mongoose.model('Job', jobSchema);
