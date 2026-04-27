@@ -1,6 +1,6 @@
 const Job = require('../models/job'); // Ensure this matches your filename
 const Application = require('../models/application'); 
-const User = require('../models/user');
+const User = require('../models/User');
 
 // ================= POST /jobs =================
 exports.createJob = async (req, res) => {
