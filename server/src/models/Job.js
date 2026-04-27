@@ -9,8 +9,9 @@ const jobSchema = new mongoose.Schema({
   },
   type: { 
     type: String, 
-    enum: ['full-time', 'part-time', 'contract', 'internship', 'freelance'],
-    required: true // Kept from your branch for filtering
+    // ✅ Capitalized to match your React dropdowns!
+    enum: ['Full-time', 'Part-time', 'Contract', 'Internship', 'Freelance'],
+    required: true
   },
   category: { 
     type: String, 
@@ -59,4 +60,5 @@ const jobSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-module.exports = mongoose.model('Job', jobSchema);
+// ✅ Change the bottom line to this:
+module.exports = mongoose.models.Job || mongoose.model('Job', jobSchema);
