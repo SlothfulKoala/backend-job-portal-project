@@ -125,7 +125,7 @@ export default function Profile() {
                 <div className="lg:col-span-4 space-y-6">
                     <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl p-8 border border-white dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none text-center">
                         <div className="relative group w-32 h-32 mx-auto mb-6">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-pink-300 via-blue-300 to-green-300 rounded-full blur-sm opacity-70"></div>
+                            <div className="absolute inset-0 bg-linear-to-tr from-pink-300 via-blue-300 to-green-300 rounded-full blur-sm opacity-70"></div>
                             <img
                                 src={imageFile ? URL.createObjectURL(imageFile) : formData.profilePic}
                                 className="relative w-full h-full rounded-full object-cover border-4 border-white dark:border-slate-900 shadow-md"

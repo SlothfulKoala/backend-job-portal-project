@@ -55,7 +55,7 @@ export default function Login() {
       <main className="flex-1 flex flex-col lg:flex-row bg-white dark:bg-slate-900 rounded-[40px] shadow-[0_20px_70px_-10px_rgba(110,95,240,0.1)] border border-slate-100 dark:border-slate-800 overflow-hidden">
         
         {/* LEFT SECTION */}
-        <div className="lg:w-1/2 bg-gradient-to-br from-[#F8F7FF] to-[#EFEDFF] dark:from-slate-800 dark:to-slate-900 p-12 flex flex-col justify-between relative overflow-hidden">
+        <div className="lg:w-1/2 bg-linear-to-br from-[#F8F7FF] to-[#EFEDFF] dark:from-slate-800 dark:to-slate-900 p-12 flex flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
             <span className="inline-block bg-white dark:bg-slate-700 px-4 py-1.5 rounded-full text-[11px] font-bold text-[#9E90FE] shadow-sm uppercase tracking-widest mb-6 border border-white dark:border-slate-600">
               Welcome Back! 👋
@@ -126,7 +126,7 @@ export default function Login() {
               </div>
             </div>
 
-            <button type="submit" className="w-full py-4 bg-gradient-to-r from-[#B5ACFF] to-[#9E90FE] text-white font-black rounded-2xl shadow-xl shadow-purple-200 hover:shadow-2xl transition-all active:scale-95">
+            <button type="submit" className="w-full py-4 bg-linear-to-r from-[#B5ACFF] to-[#9E90FE] text-white font-black rounded-2xl shadow-xl shadow-purple-200 hover:shadow-2xl transition-all active:scale-95">
               Login
             </button>
           </form>
